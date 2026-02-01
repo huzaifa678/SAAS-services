@@ -1,12 +1,21 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg'
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const connectionString = `${process.env.DATABASE_URL}`
+
+const adapter = new PrismaPg({ connectionString })
 
 const prisma = new PrismaClient({
-  log: [
-    { level: 'query', emit: 'event' },   
-    { level: 'info', emit: 'event' },   
-    { level: 'warn', emit: 'event' },    
-    { level: 'error', emit: 'event' },   
-  ],
+    adapter,
+    log: [
+        { level: 'query', emit: 'event' },
+        { level: 'info', emit: 'event' },
+        { level: 'warn', emit: 'event' },
+        { level: 'error', emit: 'event' },
+    ],
 });
 
 prisma.$on('query', (e) => {
@@ -22,4 +31,4 @@ prisma.$on('info', (e) => {
   console.info('Prisma Info:', e);
 });
 
-module.exports = prisma;
+export default prisma;

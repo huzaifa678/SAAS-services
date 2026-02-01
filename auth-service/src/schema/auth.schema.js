@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server');
+import gql from "graphql-tag";
 
 const typeDefs = gql`
   type User {
@@ -32,4 +32,5 @@ const typeDefs = gql`
     logout(token: String!): Boolean!
   }
 `;
-module.exports = typeDefs;
+
+export default typeDefs;

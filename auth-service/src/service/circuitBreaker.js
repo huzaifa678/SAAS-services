@@ -1,6 +1,6 @@
-const CircuitBreaker = require('opossum');
+import CircuitBreaker from 'opossum';
 
-function createBreaker(fn, options = {}) {
+export function createBreaker(fn, options = {}) {
   const defaultOptions = {
     timeout: 5000,      
     errorThresholdPercentage: 50, 
@@ -19,5 +19,3 @@ function createBreaker(fn, options = {}) {
 
   return breaker;
 }
-
-module.exports = { createBreaker };
