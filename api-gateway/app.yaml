@@ -5,7 +5,7 @@ app:
 
 services:
   auth:
-    url: http://localhost:8080
+    url: http://localhost:8080/api/auth/
 
 cors:
   allowedOrigins:

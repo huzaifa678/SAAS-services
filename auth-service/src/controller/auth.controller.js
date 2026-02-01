@@ -1,7 +1,7 @@
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
-import typeDefs from './src/schema/auth.schema.js';
-import { resolvers } from './src/resolvers/auth.resolver.js';
+import typeDefs from '../schema/auth.schema.js'
+import { resolvers } from '../resolvers/auth.resolver.js';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
