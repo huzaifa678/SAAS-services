@@ -7,11 +7,12 @@ export function createBreaker(fn, options = {}) {
     resetTimeout: 10000, 
   };
   
-  const breaker = new CircuitBreaker(fn, { ...defaultOptions, ...options });
+  const { fallback, ...breakerOptions } = options;
+  const breaker = new CircuitBreaker(fn, { ...defaultOptions, ...breakerOptions });
 
-  breaker.fallback(() => {
-    return { error: 'Service temporarily unavailable. Please try again later.' };
-  });
+  if (fallback) {
+    breaker.fallback(fallback);
+  }
 
   breaker.on('open', () => console.warn('Circuit breaker opened!'));
   breaker.on('halfOpen', () => console.log('Circuit breaker half-open, testing service...'));

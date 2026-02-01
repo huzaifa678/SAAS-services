@@ -2,6 +2,7 @@ import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import typeDefs from '../schema/auth.schema.js'
 import { resolvers } from '../resolvers/auth.resolver.js';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
@@ -24,7 +25,8 @@ router.use(async (req, res, next) => {
 
 router.post('/', async (req, res) => {
   try {
-    const server = new ApolloServer({ typeDefs, resolvers });
+    const schema = makeExecutableSchema({ typeDefs, resolvers });
+    const server = new ApolloServer({ schema });
     await server.start();
 
     const { query, variables } = req.body;
