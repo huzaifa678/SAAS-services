@@ -14,17 +14,22 @@ const loginFailureCounter = new promClient.Counter({
   help: 'Total failed login attempts',
 });
 
+const loginFallbackCounter = new promClient.Counter({
+  name: 'auth_login_fallback_total',
+  help: 'Number of login attempts that hit the circuit breaker fallback',
+});
+
 const loginBreaker = createBreaker(async ({ email, password }) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     loginFailureCounter.inc();
-    throw new Error('Invalid credentials');
+    throw new Error('Invalid username credential');
   }
 
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
     loginFailureCounter.inc();
-    throw new Error('Invalid credentials');
+    throw new Error('Invalid password credential');
   }
 
   const accessToken = sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.ACCESS_TOKEN_TTL });
@@ -34,13 +39,27 @@ const loginBreaker = createBreaker(async ({ email, password }) => {
     data: {
       token: refreshToken,
       userId: user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     },
   });
 
   loginSuccessCounter.inc();
   return { accessToken, refreshToken, user };
+}, {
+  timeout: 5000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 10000,
+  fallback: () => {
+    loginFallbackCounter.inc();
+    return {
+      error: 'Authentication service temporarily unavailable. Please try again later.',
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+    };
+  },
 });
+
 
 loginBreaker.on('open', () => console.warn('Login circuit breaker opened!'));
 loginBreaker.on('halfOpen', () => console.log('Login circuit breaker half-open, testing service...'));

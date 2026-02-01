@@ -13,5 +13,46 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+      - loki
+    environment:
+      - GF_LOG_LEVEL=info
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-simple-json-datasource
+    ports:
+      - "3001:3000"  # Grafana UI
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki:/etc/loki
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log
+      - ./promtail:/etc/promtail
+    command: -config.file=/etc/promtail/promtail-config.yaml
+
 volumes:
   postgres_data:
+  grafana_data:
+
