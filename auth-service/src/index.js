@@ -20,6 +20,11 @@ const server = new ApolloServer({
   },
 });
 
-server.listen({ port: 3000 }).then(({ url }) => {
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', promClient.register.contentType);
+  res.end(await promClient.register.metrics());
+});
+
+server.listen({ port: 8080 }).then(({ url }) => {
   console.log(`Auth GraphQL service ready at ${url}`);
 });
