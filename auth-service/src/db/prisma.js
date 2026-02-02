@@ -1,34 +1,53 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connectionString = `${process.env.DATABASE_URL}`
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,                 
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
 
-const adapter = new PrismaPg({ connectionString })
+const globalForPrisma = globalThis;
 
-const prisma = new PrismaClient({
+const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
     adapter,
-    log: [
-        { level: 'query', emit: 'event' },
-        { level: 'info', emit: 'event' },
-        { level: 'warn', emit: 'event' },
-        { level: 'error', emit: 'event' },
-    ],
+    log: ['warn', 'error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
+
+const shutdown = async (signal) => {
+  console.log(`\nReceived ${signal}. Closing Prisma connections...`);
+
+  try {
+    await prisma.$disconnect();
+    console.log('Prisma disconnected cleanly');
+    process.exit(0);
+  } catch (err) {
+    console.error('Error during Prisma shutdown:', err);
+    process.exit(1);
+  }
+};
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+
+process.on('uncaughtException', async (err) => {
+  console.error('Uncaught Exception:', err);
+  await shutdown('uncaughtException');
 });
 
-prisma.$on('query', (e) => {
-  console.log(`Prisma Query: ${e.query} — Params: ${e.params}`);
-});
-prisma.$on('error', (e) => {
-  console.error('Prisma Error:', e);
-});
-prisma.$on('warn', (e) => {
-  console.warn('Prisma Warning:', e);
-});
-prisma.$on('info', (e) => {
-  console.info('Prisma Info:', e);
+process.on('unhandledRejection', async (reason) => {
+  console.error('Unhandled Rejection:', reason);
+  await shutdown('unhandledRejection');
 });
 
 export default prisma;
