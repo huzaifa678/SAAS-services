@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  postgres:
+  auth-postgres:
     image: postgres:16-alpine
     container_name: auth-postgres
     environment:
@@ -12,6 +12,18 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  subscription-postgres:
+    image: postgres:16-alpine
+    container_name: subscription-postgres
+    environment:
+      POSTGRES_USER: subscription_user
+      POSTGRES_PASSWORD: subscription_password
+      POSTGRES_DB: subscription_db
+    ports:
+      - "5433:5432"   
+    volumes:
+      - subscription_postgres_data:/var/lib/postgresql/data
 
   prometheus:
     image: prom/prometheus:latest
@@ -91,9 +103,9 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
 
 
-
 volumes:
   postgres_data:
+  subscription_data:
   grafana_data:
   kafka_data:
 
