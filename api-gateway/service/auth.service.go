@@ -51,7 +51,7 @@ func NewAuthService(baseURL string, cbCfg utils.CircuitBreakerConfig) AuthServic
 		}
 
 		return resp, nil
-	}, cbCfg)
+	}, "auth-service", cbCfg)
 
 	s.forward = func(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error) {
 		ctx = context.WithValue(ctx, "graphqlRequest", struct {
@@ -61,7 +61,12 @@ func NewAuthService(baseURL string, cbCfg utils.CircuitBreakerConfig) AuthServic
 
 		res, err := wrapped(ctx)
 		if err != nil {
-			return nil, 0, err
+			fallback := []byte(`{
+				"errors": [{
+					"message": "Auth service temporarily unavailable"
+				}]
+			}`)
+			return fallback, http.StatusServiceUnavailable, nil
 		}
 
 		r := res.(struct {

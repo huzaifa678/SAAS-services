@@ -6,6 +6,8 @@ app:
 services:
   auth:
     url: http://localhost:8080/api/auth/
+  subscription:
+    url: http://localhost:8081/api/subscription/
 
 cors:
   allowedOrigins:

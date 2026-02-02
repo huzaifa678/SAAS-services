@@ -13,13 +13,27 @@ import (
 func main() {
 	cfg := utils.Load()
 
-	authSvc := service.NewAuthService(cfg.Services.Auth.URL, cfg.CircuitBreaker)
+	authSvc := service.NewAuthService(
+		cfg.Services.Auth.URL,
+		cfg.CircuitBreaker,
+	)
+
+	subSvc := service.NewSubscriptionService(
+		cfg.Services.Subscription.URL,
+		cfg.CircuitBreaker,
+	)
 
 	authEndpoint := endpoint.MakeAuthEndpoint(authSvc)
+	subEndpoint := endpoint.MakeSubscriptionEndpoint(subSvc)
 
-	handler := transport.NewGraphQLHTTPHandler(authEndpoint)
+	authHandler := transport.NewGraphQLHTTPHandler(authEndpoint)
+	subHandler := transport.NewGraphQLHTTPHandler(subEndpoint)
 
-	corsHandler := transport.CORSMiddleware(cfg.CORS.AllowedOrigins)(handler)
+	mux := http.NewServeMux()
+	mux.Handle("/api/auth/", authHandler)
+	mux.Handle("/api/subscription/", subHandler)
+
+	corsHandler := transport.CORSMiddleware(cfg.CORS.AllowedOrigins)(mux)
 
 	log.Printf("%s running on :%s (%s)", cfg.App.Name, cfg.App.Port, cfg.App.Env)
 	log.Fatal(http.ListenAndServe(":"+cfg.App.Port, corsHandler))

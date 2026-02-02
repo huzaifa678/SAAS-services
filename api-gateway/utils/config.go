@@ -28,6 +28,11 @@ type Config struct {
 		Auth struct {
 			URL string `mapstructure:"url"`
 		} `mapstructure:"auth"`
+
+		Subscription struct {
+			URL string `mapstructure:"url"`
+		} `mapstructure:"subscription"`
+		
 	} `mapstructure:"services"`
 
 	CircuitBreaker CircuitBreakerConfig `mapstructure:"circuitBreaker"`
