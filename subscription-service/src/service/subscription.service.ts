@@ -3,36 +3,26 @@ import { CreateSubscriptionInput } from '@dtos/create-subscription.dto';
 import { UpdateSubscriptionInput } from '@dtos/update-subscription.dto';
 import { SubscriptionEntity } from '@entities/subscription.entity';
 import { SubscriptionMapper } from '@mapper/subscription.mapper';
+import { SubscriptionRepository } from 'src/repository/subscription.repository';
 
 @Injectable()
 export class SubscriptionService {
-  private subscriptions: SubscriptionEntity[] = [];
+  constructor(private readonly repository: SubscriptionRepository) {}
 
   async findById(id: string): Promise<SubscriptionEntity> {
-    return this.subscriptions.find(sub => sub.id === id) as SubscriptionEntity;
+    const entity = await this.repository.findById(id);
+    if (!entity) {
+      throw new Error(`Subscription with id ${id} not found`);
+    }
+    return entity;
   }
 
   async create(input: CreateSubscriptionInput): Promise<SubscriptionEntity> {
     const entity = SubscriptionMapper.toRequest(input);
-    this.subscriptions.push(entity);
-    return entity;
+    return this.repository.createAndSave(entity);
   }
 
-  async update(
-    id: string,
-    input: UpdateSubscriptionInput,
-  ): Promise<SubscriptionEntity> {
-    const index = this.subscriptions.findIndex(sub => sub.id === id);
-    if (index === -1) throw new Error('Subscription not found');
-
-    const existing = this.subscriptions[index];
-    const updated: SubscriptionEntity = {
-      ...existing,
-      ...input,
-      updatedAt: new Date(),
-    };
-
-    this.subscriptions[index] = updated;
-    return updated;
+  async update(id: string, input: UpdateSubscriptionInput): Promise<SubscriptionEntity> {
+    return this.repository.update(id, input);
   }
 }
