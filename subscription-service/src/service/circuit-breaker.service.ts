@@ -9,21 +9,20 @@ export class CircuitBreakerService {
     create<T extends (...args: any[]) => Promise<any>>(
         action: T,
         options?: CircuitBreaker.options,
+        fallback?: (...args: Parameters<T>) => any,
     ): CircuitBreaker {
-        const defaultOptions: CircuitBreaker.options = {
+        const breaker = new CircuitBreaker(action, {
             timeout: 5000,
             errorThresholdPercentage: 50,
             resetTimeout: 10000,
-            rollingCountTimeout: 10000, 
+            rollingCountTimeout: 10000,
             rollingCountBuckets: 10,
-        };
-
-        const breaker = new CircuitBreaker(action, { ...defaultOptions, ...options });
-
-        breaker.fallback(() => {
-            this.logger.warn('Circuit breaker fallback triggered');
-            return null;
+            ...options,
         });
+
+        if (fallback) {
+            breaker.fallback(fallback);
+        }
 
         breaker.on('open', () => this.logger.warn('Circuit breaker OPEN'));
         breaker.on('halfOpen', () => this.logger.log('Circuit breaker HALF-OPEN'));

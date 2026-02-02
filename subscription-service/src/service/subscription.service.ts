@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { CreateSubscriptionInput } from '@dtos/create-subscription.dto';
 import { UpdateSubscriptionInput } from '@dtos/update-subscription.dto';
 import { SubscriptionEntity } from '@entities/subscription.entity';
@@ -18,11 +18,25 @@ export class SubscriptionService {
   ) {
     this.findByIdBreaker = this.breakerService.create(
       (id: string) => this.repository.findById(id),
+      undefined,
+      (id: string) => {
+        throw new ServiceUnavailableException(
+          `Subscription service unavailable while fetching ${id}`,
+        );
+      },
     );
 
     this.createBreaker = this.breakerService.create(
       (input: CreateSubscriptionInput) =>
-        this.repository.createAndSave(SubscriptionMapper.toRequest(input)),
+        this.repository.createAndSave(
+          SubscriptionMapper.toRequest(input),
+        ),
+      undefined,
+      () => {
+        throw new ServiceUnavailableException(
+          'Subscription service unavailable while creating subscription',
+        );
+      },
     );
   }
 
