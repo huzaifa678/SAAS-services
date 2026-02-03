@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
 	"github.com/huzaifa678/SAAS-services/endpoint"
 	"github.com/huzaifa678/SAAS-services/service"
+	"github.com/huzaifa678/SAAS-services/tracing"
 	"github.com/huzaifa678/SAAS-services/transport"
 	"github.com/huzaifa678/SAAS-services/utils"
 )
@@ -23,8 +25,11 @@ func main() {
 		cfg.CircuitBreaker,
 	)
 
-	authEndpoint := endpoint.MakeAuthEndpoint(authSvc)
-	subEndpoint := endpoint.MakeSubscriptionEndpoint(subSvc)
+	shutdown := tracing.InitTracer(cfg.App.Name)
+	defer shutdown(context.Background())
+
+	authEndpoint := endpoint.TracedEndpoint("AuthEndpoint", endpoint.MakeAuthEndpoint(authSvc))
+	subEndpoint := endpoint.TracedEndpoint("SubscriptionEndpoint", endpoint.MakeSubscriptionEndpoint(subSvc))
 
 	authHandler := transport.NewGraphQLHTTPHandler(authEndpoint)
 	subHandler := transport.NewGraphQLHTTPHandler(subEndpoint)
