@@ -1,5 +1,5 @@
-import { SubscriptionEntity } from '@entities/subscription.entity';
-import { SubscriptionResponseDto } from '@dtos/subscription-response.dto';
+import { SubscriptionEntity } from '@model/entities/subscription.entity';
+import { SubscriptionResponseDto } from '@model/dtos/subscription-response.dto';
 import { CreateSubscriptionInput } from '@model/dtos/create-subscription.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { SubscriptionStatus } from '@model/domain/subscription-status.enum';

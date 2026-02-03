@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
-import { SubscriptionModule } from './subscription.module';
-import { SubscriptionEntity } from '@model/entities/subscription.entity';
+import { SubscriptionModule } from './subscription.module.js';
+import { SubscriptionEntity } from '@model/entities/subscription.entity'
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 @Module({
   imports: [
@@ -23,9 +25,11 @@ import { SubscriptionEntity } from '@model/entities/subscription.entity';
     }),
     TypeOrmModule.forFeature([SubscriptionEntity]), 
     SubscriptionModule,
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
+      path: '/api/subscription/',
     }),
   ],
 })

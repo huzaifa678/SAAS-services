@@ -1,14 +1,14 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { CreateSubscriptionInput } from '@dtos/create-subscription.dto';
-import { UpdateSubscriptionInput } from '@dtos/update-subscription.dto';
-import { SubscriptionEntity } from '@entities/subscription.entity';
+import { Injectable, Logger, OnApplicationShutdown, ServiceUnavailableException } from '@nestjs/common';
+import { CreateSubscriptionInput } from '@model/dtos/create-subscription.dto';
+import { UpdateSubscriptionInput } from '@model/dtos/update-subscription.dto';
+import { SubscriptionEntity } from '@model/entities/subscription.entity';
 import { SubscriptionMapper } from '@mapper/subscription.mapper';
-import { SubscriptionRepository } from 'src/repository/subscription.repository';
-import { CircuitBreakerService } from './circuit-breaker.service';
+import { SubscriptionRepository } from '../repository/subscription.repository';
+import { CircuitBreakerService } from '@service/circuit-breaker.service';
 
 @Injectable()
-export class SubscriptionService {
-
+export class SubscriptionService implements OnApplicationShutdown {
+  private readonly logger = new Logger(SubscriptionService.name);
   private findByIdBreaker;
   private createBreaker;
 
@@ -54,5 +54,22 @@ export class SubscriptionService {
 
   async update(id: string, input: UpdateSubscriptionInput): Promise<SubscriptionEntity> {
     return this.repository.update(id, input);
+  }
+
+  async onApplicationShutdown(signal?: string) {
+    this.logger.log(`Application shutdown signal received: ${signal}`);
+
+    try {
+      if (this.findByIdBreaker) {
+        this.findByIdBreaker.shutdown();
+        this.logger.log('findByIdBreaker shutdown completed');
+      }
+      if (this.createBreaker) {
+        this.createBreaker.shutdown();
+        this.logger.log('createBreaker shutdown completed');
+      }
+    } catch (err) {
+      this.logger.error('Error during circuit breaker shutdown', err);
+    }
   }
 }

@@ -3,7 +3,7 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "isolatedModules": true,
     "declaration": true,
     "removeComments": true,
@@ -16,8 +16,6 @@
     "baseUrl": "./",
     "paths": {
       "@model/*": ["src/model/*"],
-      "@entities/*": ["src/model/entities/*"],
-      "@dtos/*": ["src/model/dtos/*"],
       "@mapper/*": ["src/mapper/*"],
       "@service/*": ["src/service/*"],
       "@resolvers/*": ["src/resolvers/*"],

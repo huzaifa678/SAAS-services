@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
 import { SubscriptionService } from '@service/subscription.service';
-import { CreateSubscriptionInput } from '@dtos/create-subscription.dto';
-import { UpdateSubscriptionInput } from '@dtos/update-subscription.dto';
+import { CreateSubscriptionInput } from '@model/dtos/create-subscription.dto';
+import { UpdateSubscriptionInput } from '@model/dtos/update-subscription.dto';
 
 @Controller('/')
 export class SubscriptionController {

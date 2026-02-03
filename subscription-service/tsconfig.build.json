@@ -1,4 +1,15 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@model/*": ["src/model/*"],
+      "@entities/*": ["src/model/entities/*"],
+      "@dtos/*": ["src/model/dtos/*"],
+      "@mapper/*": ["src/mapper/*"],
+      "@service/*": ["src/service/*"],
+      "@resolvers/*": ["src/resolvers/*"]
+    }
+  },
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }
