@@ -15,6 +15,9 @@ import (
 func main() {
 	cfg := utils.Load()
 
+	shutdown := tracing.InitTracer(cfg.App.Name)
+	defer shutdown(context.Background())
+
 	authSvc := service.NewAuthService(
 		cfg.Services.Auth.URL,
 		cfg.CircuitBreaker,
@@ -25,11 +28,14 @@ func main() {
 		cfg.CircuitBreaker,
 	)
 
-	shutdown := tracing.InitTracer(cfg.App.Name)
-	defer shutdown(context.Background())
+	authEndpoint := endpoint.MakeAuthEndpoint(authSvc)
+	subEndpoint := endpoint.MakeSubscriptionEndpoint(subSvc)
 
-	authEndpoint := endpoint.TracedEndpoint("AuthEndpoint", endpoint.MakeAuthEndpoint(authSvc))
-	subEndpoint := endpoint.TracedEndpoint("SubscriptionEndpoint", endpoint.MakeSubscriptionEndpoint(subSvc))
+	authEndpoint = endpoint.RateLimitMiddleware(10, 5)(authEndpoint)
+	subEndpoint = endpoint.RateLimitMiddleware(5, 3)(subEndpoint)
+
+	authEndpoint = endpoint.TracedEndpoint("AuthEndpoint", endpoint.MakeAuthEndpoint(authSvc))
+	subEndpoint = endpoint.TracedEndpoint("SubscriptionEndpoint", endpoint.MakeSubscriptionEndpoint(subSvc))
 
 	authHandler := transport.NewGraphQLHTTPHandler(authEndpoint)
 	subHandler := transport.NewGraphQLHTTPHandler(subEndpoint)
