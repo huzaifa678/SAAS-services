@@ -29,7 +29,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./docker/prometheus:/etc/prometheus
     ports:
       - "9090:9090"
 
@@ -39,6 +39,7 @@ services:
     depends_on:
       - prometheus
       - loki
+      - tempo
     environment:
       - GF_LOG_LEVEL=info
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-simple-json-datasource
@@ -46,6 +47,7 @@ services:
       - "3001:3000"  # Grafana UI
     volumes:
       - grafana_data:/var/lib/grafana
+      - docker/grafana/pr:/etc/grafana/provisioning
 
   loki:
     image: grafana/loki:2.9.0
@@ -61,8 +63,34 @@ services:
     container_name: promtail
     volumes:
       - /var/log:/var/log
-      - ./promtail:/etc/promtail
+      - ./docker/promtail:/etc/promtail
     command: -config.file=/etc/promtail/promtail-config.yaml
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./docker/tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"   
+      - "4317:4317"   
+      - "4318:4318"   
+
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./docker/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - otel_data:/var/otel
+    ports:
+      - "4318:4318"   
+      - "4317:4317"   
+    depends_on:
+      - tempo
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -100,7 +128,7 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:9094
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
     ports:
-      - "8082:8082"
+      - "9094:9094"
 
   
   kafka-ui:
@@ -120,4 +148,6 @@ volumes:
   subscription_postgres_data:
   grafana_data:
   kafka_data:
+  tempo_data:
+  otel_data:
 

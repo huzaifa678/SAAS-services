@@ -1,3 +1,4 @@
+import './tracing.js';
 import 'dotenv/config';
 import express from 'express';
 import promClient from 'prom-client';
