@@ -5,6 +5,7 @@ import { SubscriptionService } from '@service/subscription.service';
 import { CircuitBreakerService } from '@service/circuit-breaker.service';
 import { SubscriptionEntity } from '@model/entities/subscription.entity';
 import { SubscriptionRepository } from './repository/subscription.repository';
+import { SubscriptionEventsProducer } from './events/subscription.event.producer';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { SubscriptionRepository } from './repository/subscription.repository';
     SubscriptionService,
     SubscriptionResolver,
     CircuitBreakerService,
-    SubscriptionRepository, 
+    SubscriptionRepository,
+    SubscriptionEventsProducer 
   ],
   exports: [SubscriptionService],
 })

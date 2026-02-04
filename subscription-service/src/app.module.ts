@@ -6,6 +6,7 @@ import { join } from 'path';
 import { SubscriptionModule } from './subscription.module.js';
 import { SubscriptionEntity } from '@model/entities/subscription.entity'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { KafkaModule } from './kafka.module.js';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
     }),
     TypeOrmModule.forFeature([SubscriptionEntity]), 
     SubscriptionModule,
+    KafkaModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),

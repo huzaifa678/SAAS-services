@@ -1,4 +1,4 @@
-package com.example.billing_service;
+package com.project.billing_service;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

@@ -5,6 +5,7 @@ import { SubscriptionEntity } from '@model/entities/subscription.entity';
 import { SubscriptionMapper } from '@mapper/subscription.mapper';
 import { SubscriptionRepository } from '../repository/subscription.repository';
 import { CircuitBreakerService } from '@service/circuit-breaker.service';
+import { SubscriptionEventsProducer } from 'src/events/subscription.event.producer';
 
 @Injectable()
 export class SubscriptionService implements OnApplicationShutdown {
@@ -15,6 +16,7 @@ export class SubscriptionService implements OnApplicationShutdown {
   constructor(
     private readonly repository: SubscriptionRepository,
     private readonly breakerService: CircuitBreakerService,
+    private readonly eventsProducer: SubscriptionEventsProducer,
   ) {
     this.findByIdBreaker = this.breakerService.create(
       (id: string) => this.repository.findById(id),
@@ -49,11 +51,45 @@ export class SubscriptionService implements OnApplicationShutdown {
   async create(input: CreateSubscriptionInput): Promise<SubscriptionEntity> {
    const result = await this.createBreaker.fire(input);
     if (!result) throw new Error('Failed to create subscription (circuit breaker fallback)');
+
+    try {
+      await this.eventsProducer.publishEvent('subscription.created', {
+        subscriptionId: result.id,
+        userId: result.userId,
+        planId: result.planId,
+        status: result.status,
+        currentPeriodStart: result.currentPeriodStart.toISOString(),
+        currentPeriodEnd: result.currentPeriodEnd.toISOString(),
+        cancelAtPeriodEnd: result.cancelAtPeriodEnd,
+        createdAt: result.createdAt.toISOString(),
+      });
+      this.logger.log(`Published subscription.created event for ${result.id}`);
+    } catch (err) {
+      this.logger.error('Failed to publish subscription.created event', err);
+    }
     return result;
   }
 
   async update(id: string, input: UpdateSubscriptionInput): Promise<SubscriptionEntity> {
-    return this.repository.update(id, input);
+    const updated = await this.repository.update(id, input);
+
+    try {
+      await this.eventsProducer.publishEvent('subscription.updated', {
+        subscriptionId: updated.id,
+        userId: updated.userId,
+        planId: updated.planId,
+        status: updated.status,
+        currentPeriodStart: updated.currentPeriodStart.toISOString(),
+        currentPeriodEnd: updated.currentPeriodEnd.toISOString(),
+        cancelAtPeriodEnd: updated.cancelAtPeriodEnd,
+        updatedAt: updated.updatedAt.toISOString(),
+      });
+      this.logger.log(`Published subscription.created event for ${updated.id}`);
+    }
+    catch (err) {
+      this.logger.error('Failed to publish subscription.updated event', err);
+    }
+    return updated;
   }
 
   async onApplicationShutdown(signal?: string) {

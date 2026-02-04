@@ -90,6 +90,18 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
+  schema-registry:
+    image: confluentinc/cp-schema-registry:8.7.0
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:9094
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+    ports:
+      - "8082:8082"
+
   
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
