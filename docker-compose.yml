@@ -47,7 +47,7 @@ services:
       - "3001:3000"  # Grafana UI
     volumes:
       - grafana_data:/var/lib/grafana
-      - docker/grafana/pr:/etc/grafana/provisioning
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
 
   loki:
     image: grafana/loki:2.9.0
@@ -69,9 +69,9 @@ services:
   tempo:
     image: grafana/tempo:2.4.1
     container_name: tempo
-    command: ["-config.file=/etc/tempo.yaml"]
+    command: ["-config.file=/etc/tempo.yml"]
     volumes:
-      - ./docker/tempo/tempo.yaml:/etc/tempo.yaml
+      - ./docker/tempo/tempo.yml:/etc/tempo.yml
       - tempo_data:/var/tempo
     ports:
       - "3200:3200"   
@@ -82,9 +82,9 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.96.0
     container_name: otel-collector
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    command: ["--config=/etc/otel-collector-config.yml"]
     volumes:
-      - ./docker/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./docker/otel/otel-collector-config.yml:/etc/otel-collector-config.yml
       - otel_data:/var/otel
     ports:
       - "4318:4318"   
@@ -119,7 +119,7 @@ services:
       - kafka_data:/var/lib/kafka/data
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:8.7.0
+    image: confluentinc/cp-schema-registry:7.6.1
     container_name: schema-registry
     depends_on:
       - kafka
@@ -133,7 +133,7 @@ services:
   
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
+    container_name: kafka-ui-saas
     ports:
       - "8080:8080"
     depends_on:

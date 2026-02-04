@@ -27,13 +27,14 @@ ext {
 	set('snippetsDir', file("build/generated-snippets"))
 	set('springCloudVersion', "2025.1.0")
 	set('springGrpcVersion', "1.0.2")
+	set('confluentVersion', "7.6.1")
+	set('avroVersion', "1.11.3")
 }
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-kafka'
-	implementation 'org.apache.kafka:kafka-clients:current_kafka_version'
-    implementation 'org.apache.avro:avro:current_avro_version'
-    implementation 'io.confluent:kafka-avro-serializer:current_confluent_version'
+	implementation "org.apache.avro:avro:${avroVersion}"
+	implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"	
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'io.grpc:grpc-services'
 	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
