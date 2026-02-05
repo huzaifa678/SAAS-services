@@ -1,6 +1,7 @@
 package com.project.billing_service.model.mapper;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,10 +33,10 @@ public abstract class BaseMapper<E, D> {
     }
 
     public Set<E> convertToEntity(Set<D> dto, Object... args) {
-        return convertToEntity((Collection<D>) dto, args).stream().collect(Collectors.toSet());
+        return new HashSet<>(convertToEntity((Collection<D>) dto, args));
     }
 
     public Set<D> convertToDto(Set<E> entity, Object... args) {
-        return convertToDto((Collection<E>) entity, args).stream().collect(Collectors.toSet());
+        return new HashSet<>(convertToDto((Collection<E>) entity, args));
     }
 }
