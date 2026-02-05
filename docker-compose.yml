@@ -23,7 +23,19 @@ services:
     ports:
       - "5433:5432"   
     volumes:
-      - subscription_postgres_data:/var/lib/postgresql/data
+      - billing_postgres_data:/var/lib/postgresql/data
+
+  billing-postgres:
+    image: postgres:16-alpine
+    container_name: billing-postgres
+    environment:
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_password
+      POSTGRES_DB: billing_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - billing_postgres_data:/var/lib/postgresql/data
 
   prometheus:
     image: prom/prometheus:latest
@@ -135,7 +147,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui-saas
     ports:
-      - "8080:8080"
+      - "8090:8090"
     depends_on:
       - kafka
     environment:
@@ -146,6 +158,7 @@ services:
 volumes:
   postgres_data:
   subscription_postgres_data:
+  billing_postgres_data:
   grafana_data:
   kafka_data:
   tempo_data:
