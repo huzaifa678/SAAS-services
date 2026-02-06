@@ -1,10 +1,11 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.2'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.boot' version '4.0.2'
     id 'com.google.protobuf' version '0.9.5'
     id 'org.asciidoctor.jvm.convert' version '4.0.5'
 }
+
 
 group = 'com.project'
 version = '0.0.1-SNAPSHOT'
@@ -29,25 +30,26 @@ ext {
     set('springGrpcVersion', "1.0.2")
     set('confluentVersion', "7.6.1")
     set('avroVersion', "1.11.3")
+    set('springBootVersion', "3.3.2")
 }
 
 dependencies {
-
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation "com.bucket4j:bucket4j_jdk17-core:8.15.0"
+    implementation "com.bucket4j:bucket4j_jdk17-lettuce:8.15.0"
     runtimeOnly 'org.postgresql:postgresql'
-
+    implementation 'com.stripe:stripe-java:31.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-kafka'
     implementation "org.apache.avro:avro:${avroVersion}"
     implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
-
     implementation 'org.springframework.grpc:spring-grpc-server-web-spring-boot-starter'
     implementation 'io.grpc:grpc-netty-shaded'
     implementation 'io.grpc:grpc-stub'
     implementation 'io.grpc:grpc-protobuf'
-
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
 
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
@@ -77,21 +79,34 @@ dependencyManagement {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc'
+        artifact = "com.google.protobuf:protoc"
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java'
+            artifact = "io.grpc:protoc-gen-grpc-java:1.58.0"
         }
     }
     generateProtoTasks {
-        all()*.plugins {
-            grpc {
-                option '@generated=omit'
+        all().each { task ->
+            task.builtins {
+                java {}
+            }
+            task.plugins {
+                grpc {}
             }
         }
     }
 }
+
+sourceSets {
+    main {
+        java {
+            srcDirs += 'build/generated/sources/proto/main/java'
+            srcDirs += 'build/generated/sources/proto/main/grpc'
+        }
+    }
+}
+
 
 tasks.named('test') {
     outputs.dir snippetsDir

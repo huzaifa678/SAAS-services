@@ -2,13 +2,22 @@ import './tracing';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { tracing } from '@opentelemetry/sdk-node';
+import { Transport } from '@nestjs/microservices';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
   app.enableShutdownHooks();
+  app.connectMicroservice({
+    transport: Transport.GRPC,
+    options: {
+      package: 'subscription',
+      protoPath: 'src/proto/subscription.proto',
+      url: '0.0.0.0:50051',
+    },
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

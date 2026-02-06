@@ -1,6 +1,5 @@
 package com.project.billing_service.model.entities;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

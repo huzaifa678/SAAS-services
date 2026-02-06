@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package subscription;
+
+import "google/protobuf/timestamp.proto";
+
+service SubscriptionService {
+  rpc GetSubscription(GetSubscriptionRequest) returns (SubscriptionResponse);
+}
+
+message GetSubscriptionRequest {
+  string subscriptionId = 1;
+}
+
+message SubscriptionResponse {
+  string id = 1;
+  string userId = 2;
+  string planId = 3;
+  string status = 4;
+  google.protobuf.Timestamp currentPeriodStart = 5;
+  google.protobuf.Timestamp currentPeriodEnd = 6;
+  bool cancelAtPeriodEnd = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+}

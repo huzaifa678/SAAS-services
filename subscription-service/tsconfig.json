@@ -19,6 +19,7 @@
       "@mapper/*": ["src/mapper/*"],
       "@service/*": ["src/service/*"],
       "@resolvers/*": ["src/resolvers/*"],
+      "@pb/*": ["src/pb/*"]
     },
     "strict": true,
     "incremental": true,

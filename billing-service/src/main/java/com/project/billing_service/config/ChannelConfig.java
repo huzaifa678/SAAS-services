@@ -1,0 +1,19 @@
+package com.project.billing_service.config;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+
+public class ChannelConfig {
+    @Bean(destroyMethod = "shutdown")
+    public ManagedChannel subscriptionChannel(
+            @Value("${grpc.subscription.host}") String host,
+            @Value("${grpc.subscription.port}") int port
+    ) {
+        return ManagedChannelBuilder
+                .forAddress(host, port)
+                .usePlaintext()
+                .build();
+    }
+}
