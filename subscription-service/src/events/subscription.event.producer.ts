@@ -2,8 +2,9 @@ import 'dotenv/config';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Kafka, Producer } from 'kafkajs';
 import { SchemaRegistry, SchemaType } from '@kafkajs/confluent-schema-registry';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
+
 
 @Injectable()
 export class SubscriptionEventsProducer implements OnModuleInit {
@@ -28,12 +29,42 @@ export class SubscriptionEventsProducer implements OnModuleInit {
   }
 
   private async registerSchema(topic: string, filePath: string) {
-    const schemaContent = fs.readFileSync(path.join(__dirname, filePath), 'utf-8');
-    const { id } = await this.registry.register({
-      type: SchemaType.AVRO,
-      schema: schemaContent,
-    });
-    this.schemaIds[topic] = id;
+    const schemaPath = path.resolve(
+      __dirname,
+      '../schemas',
+      path.basename(filePath)
+    );
+
+    const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
+
+    const subject = `${topic}-value`;
+
+    try {
+      const { id } = await this.registry.register(
+        {
+          type: SchemaType.AVRO,
+          schema: schemaContent,
+        },
+        { subject }
+      );
+
+      this.schemaIds[topic] = id;
+      return;
+    } catch (e: any) {
+      if (e?.status === 400) {
+        const { id } = await this.registry.register(
+          {
+            type: SchemaType.AVRO,
+            schema: schemaContent,
+          },
+          { subject }
+        );
+
+        this.schemaIds[topic] = id;
+        return;
+      }
+      throw e;
+    } 
   }
 
   async publishEvent(topic: 'subscription.created' | 'subscription.updated', event: any) {

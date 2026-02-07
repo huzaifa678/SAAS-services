@@ -39,8 +39,8 @@ public class BillingService {
         return invoiceRepository.save(invoice);
     }
 
-    public List<InvoiceEntity> getInvoicesByAccount(UUID billingAccountId) {
-        return invoiceRepository.findByBillingAccountId(billingAccountId);
+    public List<InvoiceEntity> getInvoicesByAccount(UUID customerId) {
+        return invoiceRepository.findByCustomerId(customerId);
     }
 
     public List<InvoiceEntity> getInvoicesByStatus(String status) {

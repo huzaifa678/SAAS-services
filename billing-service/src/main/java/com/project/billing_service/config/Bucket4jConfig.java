@@ -2,7 +2,6 @@ package com.project.billing_service.config;
 
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.redis.lettuce.Bucket4jLettuce;
-import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.ByteArrayCodec;
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class Bucket4jConfig {
 
-    @Bean(destroyMethod = "close")
+    @Bean
     public ProxyManager<String> proxyManager(RedisClient redisClient) {
         StatefulRedisConnection<String, byte[]> connection = redisClient
                 .connect(RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE));

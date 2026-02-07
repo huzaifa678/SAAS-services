@@ -4,7 +4,10 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+
+@Configuration
 public class ChannelConfig {
     @Bean(destroyMethod = "shutdown")
     public ManagedChannel subscriptionChannel(

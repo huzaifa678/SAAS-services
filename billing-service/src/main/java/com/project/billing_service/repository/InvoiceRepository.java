@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface InvoiceRepository
         extends JpaRepository<InvoiceEntity, UUID> {
 
-    List<InvoiceEntity> findByBillingAccountId(UUID billingAccountId);
+    List<InvoiceEntity> findByCustomerId(UUID customerId);
 
     List<InvoiceEntity> findByStatus(String status);
 
