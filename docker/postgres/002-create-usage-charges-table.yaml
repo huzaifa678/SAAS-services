@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-usage-charges-table
+      author: billing-service
+      changes:
+        - createTable:
+            tableName: usage_charges
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: invoice_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: metric
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: quantity
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: unit_price
+                  type: NUMERIC(19,4)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: total_price
+                  type: NUMERIC(19,4)
+                  constraints:
+                    nullable: false

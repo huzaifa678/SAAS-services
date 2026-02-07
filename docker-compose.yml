@@ -68,7 +68,7 @@ services:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./loki:/etc/loki
+      - ./docker/loki:/etc/loki
 
   promtail:
     image: grafana/promtail:2.9.0
@@ -99,8 +99,8 @@ services:
       - ./docker/otel/otel-collector-config.yml:/etc/otel-collector-config.yml
       - otel_data:/var/otel
     ports:
-      - "4318:4318"   
-      - "4317:4317"   
+      - "43180:4318"   
+      - "43170:4317"   
     depends_on:
       - tempo
 
@@ -125,14 +125,14 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
-      KAFKA_CLUSTER_ID: kraft-cluster-1
+      CLUSTER_ID: LshexmLSRjiD-5Z2hMkvbQ
 
     volumes:
       - kafka_data:/var/lib/kafka/data
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.6.1
-    container_name: schema-registry
+    container_name: schema-registry-saas
     depends_on:
       - kafka
     environment:
@@ -159,6 +159,24 @@ services:
     container_name: redis-saas
     ports:
       - "6379:6379"
+
+  liquibase_postgres:
+    image: liquibase/liquibase:4.27
+    container_name: liquibase-saas
+    depends_on:
+      - billing-postgres
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://billing-postgres:5432/billing_db
+      LIQUIBASE_COMMAND_USERNAME: billing_user
+      LIQUIBASE_COMMAND_PASSWORD: billing_password
+    volumes:
+      - ./docker/postgres:/liquibase/changelog
+    working_dir: /liquibase/changelog
+    entrypoint: [ "liquibase" ]
+    command:
+      - "--changeLogFile=changelog-master.yaml"
+      - "update"
+      - "--log-level=debug"
 
 
 volumes:

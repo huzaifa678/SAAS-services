@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-add-indexes
+      author: billing-service
+      changes:
+        - createIndex:
+            tableName: invoices
+            indexName: idx_invoices_subscription_id
+            columns:
+              - column:
+                  name: subscription_id
+
+        - createIndex:
+            tableName: invoices
+            indexName: idx_invoices_customer_id
+            columns:
+              - column:
+                  name: customer_id
+
+        - createIndex:
+            tableName: invoices
+            indexName: idx_invoices_status
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: usage_charges
+            indexName: idx_usage_charges_invoice_id
+            columns:
+              - column:
+                  name: invoice_id
+

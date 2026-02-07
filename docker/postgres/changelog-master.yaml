@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: 001-create-invoices-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 002-create-usage-charges-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 003-add-indexes.yaml
+      relativeToChangelogFile: true
+
