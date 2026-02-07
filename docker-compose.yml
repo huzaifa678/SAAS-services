@@ -154,6 +154,12 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
 
+  redis:
+    image: redis:7
+    container_name: redis-saas
+    ports:
+      - "6379:6379"
+
 
 volumes:
   postgres_data:
