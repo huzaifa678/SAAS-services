@@ -25,6 +25,7 @@ public class BillingService {
     private final BillingInterface paymentService; // strategy
     private final SubscriptionGrpcClient subscriptionGrpcClient;
     private final RateLimiterService rateLimiterService;
+    private final UsageChargeService usageChargeService;
 
 
     public InvoiceEntity createInvoice(InvoiceDto dto) {
@@ -58,8 +59,13 @@ public class BillingService {
 
         try {
             String status = paymentService.payInvoice(invoice, paymentMethodId);
-            invoice.setStatus("succeeded".equals(status) ? InvoiceStatus.PAID.name() : InvoiceStatus.FAILED.name());
-            invoiceRepository.save(invoice);
+            if ("succeeded".equals(status)) {
+                String metric = "api_calls";
+                long quantity = 1L;
+                BigDecimal unitPrice = invoice.getAmount().divide(BigDecimal.valueOf(quantity));
+
+                usageChargeService.createUsageCharge(invoice.getInvoiceId(), metric, quantity, unitPrice);
+            }
             return status;
         } catch (Exception e) {
             invoice.setStatus(InvoiceStatus.FAILED.name());
@@ -69,7 +75,7 @@ public class BillingService {
     }
 
     @Transactional
-    public InvoiceEntity createInitialInvoice(UUID subscriptionId, UUID customerId) {
+    public void createInitialInvoice(UUID subscriptionId, UUID customerId) {
 
         invoiceRepository.findBySubscriptionId(subscriptionId)
                 .ifPresent(existing -> {
@@ -88,6 +94,6 @@ public class BillingService {
                 .dueAt(OffsetDateTime.now().plusDays(7))
                 .build();
 
-        return invoiceRepository.save(invoice);
+        invoiceRepository.save(invoice);
     }
 }

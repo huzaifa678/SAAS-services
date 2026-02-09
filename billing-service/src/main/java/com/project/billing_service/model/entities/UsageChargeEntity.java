@@ -1,11 +1,15 @@
 package com.project.billing_service.model.entities;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "usage_charges")
+@Getter
+@Setter
 public class UsageChargeEntity {
 
     @Id
