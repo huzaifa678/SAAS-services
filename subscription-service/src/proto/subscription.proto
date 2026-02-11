@@ -6,6 +6,8 @@ import "google/protobuf/timestamp.proto";
 
 service SubscriptionService {
   rpc GetSubscription(GetSubscriptionRequest) returns (SubscriptionResponse);
+
+  rpc GetUserActiveSubscriptions(GetUserActiveSubscriptionsRequest) returns (GetUserActiveSubscriptionsResponse);
 }
 
 message GetSubscriptionRequest {
@@ -22,4 +24,12 @@ message SubscriptionResponse {
   bool cancelAtPeriodEnd = 7;
   google.protobuf.Timestamp createdAt = 8;
   google.protobuf.Timestamp updatedAt = 9;
+}
+
+message GetUserActiveSubscriptionsRequest {
+  string userId = 1;
+}
+
+message GetUserActiveSubscriptionsResponse {
+  repeated SubscriptionResponse subscriptions = 1;
 }

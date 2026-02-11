@@ -11,6 +11,7 @@ import { SubscriptionEventsProducer } from 'src/events/subscription.event.produc
 export class SubscriptionService implements OnApplicationShutdown {
   private readonly logger = new Logger(SubscriptionService.name);
   private findByIdBreaker;
+  private findByUserIdBreaker;
   private createBreaker;
 
   constructor(
@@ -24,6 +25,16 @@ export class SubscriptionService implements OnApplicationShutdown {
       (id: string) => {
         throw new ServiceUnavailableException(
           `Subscription service unavailable while fetching ${id}`,
+        );
+      },
+    );
+
+    this.findByUserIdBreaker = this.breakerService.create(
+      (userId: string) => this.repository.findActiveByUserId(userId),
+      undefined,
+      (userId: string) => {
+        throw new ServiceUnavailableException(
+          `Subscription service unavailable while fetching active subscriptions for user ${userId}`,
         );
       },
     );
@@ -45,6 +56,16 @@ export class SubscriptionService implements OnApplicationShutdown {
   async findById(id: string): Promise<SubscriptionEntity> {
     const result = await this.findByIdBreaker.fire(id);
     if (!result) throw new Error('Subscription not found (circuit breaker fallback)');
+    return result;
+  }
+
+  async findActiveByUserId(userId: string): Promise<SubscriptionEntity[]> {
+    const result = await this.findByUserIdBreaker.fire(userId);
+
+    if (!result || result.length === 0) {
+      throw new Error('No active subscriptions found (circuit breaker fallback)');
+    }
+
     return result;
   }
 

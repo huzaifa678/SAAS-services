@@ -1,5 +1,7 @@
 package com.project.billing_service.service;
 
+import billing.SubscriptionStatus;
+import billing.SubscriptionUpdated;
 import com.project.billing_service.client.SubscriptionGrpcClient;
 import com.project.billing_service.model.dtos.InvoiceDto;
 import com.project.billing_service.model.entities.InvoiceEntity;
@@ -74,6 +76,12 @@ public class BillingService {
         }
     }
 
+    public List<Subscription.SubscriptionResponse> getActiveSubscriptions(UUID userId) {
+        Subscription.GetUserActiveSubscriptionsResponse response =
+                subscriptionGrpcClient.getUserActiveSubscriptions(userId.toString());
+        return response.getSubscriptionsList();
+    }
+
     @Transactional
     public void createInitialInvoice(UUID subscriptionId, UUID customerId) {
 
@@ -95,5 +103,39 @@ public class BillingService {
                 .build();
 
         invoiceRepository.save(invoice);
+    }
+
+    @Transactional
+    public void handleSubscriptionUpdate(SubscriptionUpdated event) {
+
+        UUID subscriptionId =
+                UUID.fromString(event.getSubscriptionId());
+
+        SubscriptionStatus status = event.getStatus();
+
+        switch (status) {
+
+            case ACTIVE -> {
+                invoiceRepository
+                        .findBySubscriptionId(subscriptionId)
+                        .ifPresent(invoice -> {
+                            if (InvoiceStatus.DRAFT.name().equals(invoice.getStatus())) {
+                                invoice.setStatus(InvoiceStatus.ISSUED.name());
+                            }
+                        });
+            }
+
+            case CANCELED, EXPIRED -> {
+                invoiceRepository
+                        .findBySubscriptionId(subscriptionId)
+                        .ifPresent(invoice -> {
+                            invoice.setStatus(InvoiceStatus.FAILED.name());
+                            invoiceRepository.save(invoice);
+                        });
+            }
+
+            case TRIALING -> {
+            }
+        }
     }
 }

@@ -14,5 +14,5 @@ public interface InvoiceRepository
 
     List<InvoiceEntity> findByStatus(String status);
 
-    Optional<Object> findBySubscriptionId(UUID subscriptionId);
+    Optional<InvoiceEntity> findBySubscriptionId(UUID subscriptionId);
 }

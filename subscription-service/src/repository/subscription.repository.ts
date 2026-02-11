@@ -2,6 +2,7 @@ import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { SubscriptionEntity } from '@model/entities/subscription.entity';
+import { SubscriptionStatus } from '@model/domain/subscription-status.enum';
 
 @Injectable()
 export class SubscriptionRepository implements OnApplicationShutdown {
@@ -17,6 +18,15 @@ export class SubscriptionRepository implements OnApplicationShutdown {
 
   findById(id: string) {
     return this.repo.findOne({ where: { id } });
+  }
+
+  findActiveByUserId(userId: string) {
+    return this.repo.find({
+      where: {
+        userId,
+        status: SubscriptionStatus.ACTIVE, 
+      },
+    });
   }
 
   createAndSave(subscription: SubscriptionEntity) {

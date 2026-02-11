@@ -15,7 +15,7 @@ public class BillingController {
 
     private final BillingService billingService;
 
-    @PostMapping("invoices")
+    @PostMapping("/invoices")
     public InvoiceEntity createInvoice(@RequestBody InvoiceDto dto) {
         return billingService.createInvoice(dto);
     }

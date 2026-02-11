@@ -18,6 +18,9 @@ async function bootstrap() {
       url: '0.0.0.0:50051',
     },
   });
+
+  await app.startAllMicroservices();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

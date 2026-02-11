@@ -40,6 +40,14 @@ export interface SubscriptionResponse {
   updatedAt: Timestamp | undefined;
 }
 
+export interface GetUserActiveSubscriptionsRequest {
+  userId: string;
+}
+
+export interface GetUserActiveSubscriptionsResponse {
+  subscriptions: SubscriptionResponse[];
+}
+
 export const SUBSCRIPTION_PACKAGE_NAME = "subscription";
 
 function createBaseGetSubscriptionRequest(): GetSubscriptionRequest {
@@ -214,19 +222,104 @@ export const SubscriptionResponse: MessageFns<SubscriptionResponse> = {
   },
 };
 
+function createBaseGetUserActiveSubscriptionsRequest(): GetUserActiveSubscriptionsRequest {
+  return { userId: "" };
+}
+
+export const GetUserActiveSubscriptionsRequest: MessageFns<GetUserActiveSubscriptionsRequest> = {
+  encode(message: GetUserActiveSubscriptionsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetUserActiveSubscriptionsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetUserActiveSubscriptionsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetUserActiveSubscriptionsResponse(): GetUserActiveSubscriptionsResponse {
+  return { subscriptions: [] };
+}
+
+export const GetUserActiveSubscriptionsResponse: MessageFns<GetUserActiveSubscriptionsResponse> = {
+  encode(message: GetUserActiveSubscriptionsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.subscriptions) {
+      SubscriptionResponse.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetUserActiveSubscriptionsResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetUserActiveSubscriptionsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.subscriptions.push(SubscriptionResponse.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
 export interface SubscriptionServiceClient {
   getSubscription(request: GetSubscriptionRequest): Observable<SubscriptionResponse>;
+
+  getUserActiveSubscriptions(
+    request: GetUserActiveSubscriptionsRequest,
+  ): Observable<GetUserActiveSubscriptionsResponse>;
 }
 
 export interface SubscriptionServiceController {
   getSubscription(
     request: GetSubscriptionRequest,
   ): Promise<SubscriptionResponse> | Observable<SubscriptionResponse> | SubscriptionResponse;
+
+  getUserActiveSubscriptions(
+    request: GetUserActiveSubscriptionsRequest,
+  ):
+    | Promise<GetUserActiveSubscriptionsResponse>
+    | Observable<GetUserActiveSubscriptionsResponse>
+    | GetUserActiveSubscriptionsResponse;
 }
 
 export function SubscriptionServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getSubscription"];
+    const grpcMethods: string[] = ["getSubscription", "getUserActiveSubscriptions"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("SubscriptionService", method)(constructor.prototype[method], method, descriptor);
@@ -254,10 +347,24 @@ export const SubscriptionServiceService = {
       Buffer.from(SubscriptionResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer): SubscriptionResponse => SubscriptionResponse.decode(value),
   },
+  getUserActiveSubscriptions: {
+    path: "/subscription.SubscriptionService/GetUserActiveSubscriptions",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetUserActiveSubscriptionsRequest): Buffer =>
+      Buffer.from(GetUserActiveSubscriptionsRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): GetUserActiveSubscriptionsRequest =>
+      GetUserActiveSubscriptionsRequest.decode(value),
+    responseSerialize: (value: GetUserActiveSubscriptionsResponse): Buffer =>
+      Buffer.from(GetUserActiveSubscriptionsResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): GetUserActiveSubscriptionsResponse =>
+      GetUserActiveSubscriptionsResponse.decode(value),
+  },
 } as const;
 
 export interface SubscriptionServiceServer extends UntypedServiceImplementation {
   getSubscription: handleUnaryCall<GetSubscriptionRequest, SubscriptionResponse>;
+  getUserActiveSubscriptions: handleUnaryCall<GetUserActiveSubscriptionsRequest, GetUserActiveSubscriptionsResponse>;
 }
 
 export interface SubscriptionServiceClient extends Client {
@@ -275,6 +382,21 @@ export interface SubscriptionServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: SubscriptionResponse) => void,
+  ): ClientUnaryCall;
+  getUserActiveSubscriptions(
+    request: GetUserActiveSubscriptionsRequest,
+    callback: (error: ServiceError | null, response: GetUserActiveSubscriptionsResponse) => void,
+  ): ClientUnaryCall;
+  getUserActiveSubscriptions(
+    request: GetUserActiveSubscriptionsRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetUserActiveSubscriptionsResponse) => void,
+  ): ClientUnaryCall;
+  getUserActiveSubscriptions(
+    request: GetUserActiveSubscriptionsRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetUserActiveSubscriptionsResponse) => void,
   ): ClientUnaryCall;
 }
 
