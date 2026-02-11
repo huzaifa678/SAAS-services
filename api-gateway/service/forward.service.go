@@ -10,62 +10,61 @@ import (
 
 	kithttp "github.com/go-kit/kit/transport/http"
 
-	"github.com/huzaifa678/SAAS-services/utils"
 	"github.com/huzaifa678/SAAS-services/circuit"
+	"github.com/huzaifa678/SAAS-services/utils"
 )
 
-type AuthService interface {
+type ForwardService interface {
 	Forward(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error)
 }
 
-type authService struct {
+type forwardService struct {
 	forward func(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error)
 }
 
-func NewAuthService(baseURL string, cbCfg utils.CircuitBreakerConfig) AuthService {
-	s := &authService{}
-
+func NewForwardService(
+	baseURL string,
+	serviceName string,
+	fallbackMsg string,
+	cbCfg utils.CircuitBreakerConfig,
+) ForwardService {
+	s := &forwardService{}
 	u := mustParseURL(baseURL)
 
 	client := kithttp.NewClient(
 		"POST",
 		u,
-		encodeGraphQLRequest,
-		decodeGraphQLResponse,
+		encodeRequest,
+		decodeResponse,
 	).Endpoint()
 
-	wrapped := circuit.WrapWithBreaker(func(ctx context.Context) (interface{}, error) {
-		v := ctx.Value("graphqlRequest")
-		if v == nil {
-			return nil, errors.New("no request in context")
-		}
+	wrapped := circuit.WrapWithBreaker(
+		func(ctx context.Context) (interface{}, error) {
+			v := ctx.Value("request")
+			if v == nil {
+				return nil, errors.New("no request in context")
+			}
 
-		req := v.(struct {
-			Body   []byte
-			Header http.Header
-		})
+			req := v.(struct {
+				Body   []byte
+				Header http.Header
+			})
 
-		resp, err := client(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-
-		return resp, nil
-	}, "auth-service", cbCfg)
+			return client(ctx, req)
+		},
+		serviceName,
+		cbCfg,
+	)
 
 	s.forward = func(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error) {
-		ctx = context.WithValue(ctx, "graphqlRequest", struct {
+		ctx = context.WithValue(ctx, "request", struct {
 			Body   []byte
 			Header http.Header
 		}{body, headers})
 
 		res, err := wrapped(ctx)
 		if err != nil {
-			fallback := []byte(`{
-				"errors": [{
-					"message": "Auth service temporarily unavailable"
-				}]
-			}`)
+			fallback := []byte(`{"errors":[{"message":"` + fallbackMsg + `"}]}`)
 			return fallback, http.StatusServiceUnavailable, nil
 		}
 
@@ -79,7 +78,7 @@ func NewAuthService(baseURL string, cbCfg utils.CircuitBreakerConfig) AuthServic
 	return s
 }
 
-func (s *authService) Forward(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error) {
+func (s *forwardService) Forward(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error) {
 	return s.forward(ctx, body, headers)
 }
 
@@ -91,12 +90,11 @@ func mustParseURL(u string) *url.URL {
 	return parsed
 }
 
-func encodeGraphQLRequest(_ context.Context, req *http.Request, request interface{}) error {
+func encodeRequest(_ context.Context, req *http.Request, request interface{}) error {
 	r := request.(struct {
 		Body   []byte
 		Header http.Header
 	})
-
 	req.Body = io.NopCloser(bytes.NewReader(r.Body))
 	req.Header.Set("Content-Type", "application/json")
 	for k, v := range r.Header {
@@ -107,7 +105,7 @@ func encodeGraphQLRequest(_ context.Context, req *http.Request, request interfac
 	return nil
 }
 
-func decodeGraphQLResponse(_ context.Context, resp *http.Response) (interface{}, error) {
+func decodeResponse(_ context.Context, resp *http.Response) (interface{}, error) {
 	b, _ := io.ReadAll(resp.Body)
 	return struct {
 		Body   []byte

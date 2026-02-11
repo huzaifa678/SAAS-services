@@ -7,29 +7,29 @@ import (
 	"github.com/huzaifa678/SAAS-services/service"
 )
 
-type GraphQLRequest struct {
-	Body []byte
-	Header map[string][]string
+type ForwardRequest struct {
+    Body   []byte
+    Header map[string][]string
 }
 
-type GraphQLResponse struct {
-	Body  []byte
-	Error string
-	Status int
+type ForwardResponse struct {
+    Body   []byte
+    Error  string
+    Status int
 }
 
-func MakeAuthEndpoint(s service.AuthService) endpoint.Endpoint {
+func MakeAuthEndpoint(s service.ForwardService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GraphQLRequest)
+		req := request.(ForwardRequest)
 		body, status, err := s.Forward(ctx, req.Body, req.Header)
 		if err != nil {
-			return GraphQLResponse{
+			return ForwardResponse{
 				Error:  err.Error(),
 				Status: status,
 			}, nil
 		}
 
-		return GraphQLResponse{
+		return ForwardResponse{
 			Body:   body,
 			Status: status,
 		}, nil

@@ -7,7 +7,7 @@ import (
 	"github.com/huzaifa678/SAAS-services/service"
 )
 
-func MakeSubscriptionEndpoint(s service.ForwardService) endpoint.Endpoint {
+func MakeBillingEndpoint(s service.ForwardService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ForwardRequest)
 

@@ -43,24 +43,47 @@ func main() {
 }
 
 func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Config) {
-	authSvc := service.NewAuthService(cfg.Services.Auth.URL, cfg.CircuitBreaker)
-	subSvc := service.NewSubscriptionService(cfg.Services.Subscription.URL, cfg.CircuitBreaker)
+	subSvc := service.NewForwardService(
+		cfg.Services.Subscription.URL,
+		"subscription-service",
+		"Subscription service temporarily unavailable",
+		cfg.CircuitBreaker,
+	)
+
+	authSvc := service.NewForwardService(
+		cfg.Services.Auth.URL,
+		"auth-service",
+		"Auth service temporarily unavailable",
+		cfg.CircuitBreaker,
+	)
+
+	billSvc := service.NewForwardService(
+		cfg.Services.Auth.URL,
+		"billing-service",
+		"Billing service temporarily unavailable",
+		cfg.CircuitBreaker,
+	)
 
 	authEndpoint := endpoint.MakeAuthEndpoint(authSvc)
 	subEndpoint := endpoint.MakeSubscriptionEndpoint(subSvc)
+	billEndpoint := endpoint.MakeBillingEndpoint(billSvc)
 
 	authEndpoint = endpoint.RateLimitMiddleware(10, 5)(authEndpoint)
 	subEndpoint = endpoint.RateLimitMiddleware(5, 3)(subEndpoint)
+	billEndpoint = endpoint.RateLimitMiddleware(5, 3)(billEndpoint)
 
 	authEndpoint = endpoint.TracedEndpoint("AuthEndpoint", authEndpoint)
 	subEndpoint = endpoint.TracedEndpoint("SubscriptionEndpoint", subEndpoint)
+	billEndpoint = endpoint.TracedEndpoint("BillingEndpoint", billEndpoint)
 
 	authHandler := transport.NewGraphQLHTTPHandler(authEndpoint)
 	subHandler := transport.NewGraphQLHTTPHandler(subEndpoint)
+	billHandler := transport.NewRESTHTTPHandler(billEndpoint)
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/auth/", authHandler)
 	mux.Handle("/api/subscription/", subHandler)
+	mux.Handle("/api/billing/", billHandler)
 
 	corsHandler := transport.CORSMiddleware(cfg.CORS.AllowedOrigins)(mux)
 
