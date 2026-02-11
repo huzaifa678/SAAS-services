@@ -1,6 +1,7 @@
 package com.project.billing_service.client;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.grpc.ManagedChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ public class SubscriptionGrpcClient {
         this.stub = SubscriptionServiceGrpc.newBlockingStub(subscriptionChannel);
     }
 
+    @Retry(name = "subscriptionGrpc", fallbackMethod = "subscriptionFallback")
     @CircuitBreaker(name = "subscriptionGrpc", fallbackMethod = "subscriptionFallback")
     public Subscription.SubscriptionResponse getSubscription(String subscriptionId) {
         Subscription.GetSubscriptionRequest request =
@@ -29,6 +31,7 @@ public class SubscriptionGrpcClient {
         return stub.getSubscription(request);
     }
 
+    @Retry(name = "subscriptionGrpc", fallbackMethod = "getUserActiveSubscriptionsFallback")
     @CircuitBreaker(name = "subscriptionGrpc", fallbackMethod = "getUserActiveSubscriptionsFallback")
     public Subscription.GetUserActiveSubscriptionsResponse getUserActiveSubscriptions(String userId) {
         Subscription.GetUserActiveSubscriptionsRequest request =
