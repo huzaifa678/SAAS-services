@@ -58,7 +58,7 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	)
 
 	billSvc := service.NewForwardService(
-		cfg.Services.Auth.URL,
+		cfg.Services.Billing.URL,
 		"billing-service",
 		"Billing service temporarily unavailable",
 		cfg.CircuitBreaker,

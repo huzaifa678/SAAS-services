@@ -8,6 +8,8 @@ services:
     url: http://localhost:8080/api/auth/
   subscription:
     url: http://localhost:8081/api/subscription/
+  billing:
+    url:  http://localhost:8082/api/billing/
 
 cors:
   allowedOrigins:

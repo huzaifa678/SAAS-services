@@ -32,6 +32,10 @@ type Config struct {
 		Subscription struct {
 			URL string `mapstructure:"url"`
 		} `mapstructure:"subscription"`
+
+		Billing struct {
+			URL string `mapstructure:"url"`
+		} `mapstructure:"billing"`
 		
 	} `mapstructure:"services"`
 
