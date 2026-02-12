@@ -4,8 +4,12 @@ import com.project.billing_service.model.dtos.InvoiceDto;
 import com.project.billing_service.model.entities.InvoiceEntity;
 import com.project.billing_service.service.BillingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import subscription.Subscription;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -16,20 +20,31 @@ public class BillingController {
     private final BillingService billingService;
 
     @PostMapping("/invoices")
-    public InvoiceEntity createInvoice(@RequestBody InvoiceDto dto) {
-        return billingService.createInvoice(dto);
+    public ResponseEntity<InvoiceEntity> createInvoice(@RequestBody InvoiceDto dto) {
+        InvoiceEntity invoice = billingService.createInvoice(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(invoice);
     }
 
     @GetMapping("/invoices/{id}")
-    public InvoiceEntity getInvoice(@PathVariable UUID id) {
-        return billingService.getInvoice(id);
+    public ResponseEntity<InvoiceEntity> getInvoice(@PathVariable UUID id) {
+        InvoiceEntity invoice = billingService.getInvoice(id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(invoice);
     }
 
     @PostMapping("/invoices/{id}/pay")
-    public String payInvoice(
-            @PathVariable UUID id,
-            @RequestParam String paymentMethodId
+    public ResponseEntity<InvoiceEntity> payInvoice(
+            @PathVariable UUID id
     ) {
-        return billingService.payInvoice(id, paymentMethodId);
+        InvoiceEntity invoice = billingService.getInvoice(id);
+        return ResponseEntity.ok(invoice);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<Subscription.SubscriptionResponse>> getActiveSubscriptions(
+            @RequestParam UUID userId
+    ) {
+        List<Subscription.SubscriptionResponse> subscriptions =
+                billingService.getActiveSubscriptions(userId);
+        return ResponseEntity.ok(subscriptions);
     }
 }

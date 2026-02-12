@@ -3,6 +3,10 @@ package com.project.billing_service.service;
 import billing.SubscriptionStatus;
 import billing.SubscriptionUpdated;
 import com.project.billing_service.client.SubscriptionGrpcClient;
+import com.project.billing_service.exceptions.InvalidSubscriptionStateException;
+import com.project.billing_service.exceptions.InvoiceNotFoundException;
+import com.project.billing_service.exceptions.PaymentFailedException;
+import com.project.billing_service.exceptions.SubscriptionServiceUnavailableException;
 import com.project.billing_service.model.dtos.InvoiceDto;
 import com.project.billing_service.model.entities.InvoiceEntity;
 import com.project.billing_service.model.entities.InvoiceStatus;
@@ -31,10 +35,21 @@ public class BillingService {
 
 
     public InvoiceEntity createInvoice(InvoiceDto dto) {
-        Subscription.SubscriptionResponse sub = subscriptionGrpcClient.getSubscription(dto.getSubscriptionId().toString());
+
+        Subscription.SubscriptionResponse sub;
+        try {
+            sub = subscriptionGrpcClient
+                    .getSubscription(dto.getSubscriptionId().toString());
+        } catch (Exception ex) {
+            throw new SubscriptionServiceUnavailableException(
+                    "Subscription service is unavailable"
+            );
+        }
 
         if (!"ACTIVE".equals(sub.getStatus())) {
-            throw new IllegalStateException("Cannot invoice inactive subscription");
+            throw new InvalidSubscriptionStateException(
+                    "Cannot create invoice for inactive subscription"
+            );
         }
 
         InvoiceEntity invoice = mapper.convertToEntity(dto);
@@ -52,34 +67,65 @@ public class BillingService {
 
     public InvoiceEntity getInvoice(UUID invoiceId) {
         return invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(() ->
+                        new InvoiceNotFoundException(
+                                "Invoice not found with id: " + invoiceId
+                        )
+                );
     }
 
     public String payInvoice(UUID invoiceId, String paymentMethodId) {
+
         rateLimiterService.checkPayInvoice(invoiceId);
+
         InvoiceEntity invoice = getInvoice(invoiceId);
 
         try {
             String status = paymentService.payInvoice(invoice, paymentMethodId);
+
             if ("succeeded".equals(status)) {
+
                 String metric = "api_calls";
                 long quantity = 1L;
-                BigDecimal unitPrice = invoice.getAmount().divide(BigDecimal.valueOf(quantity));
 
-                usageChargeService.createUsageCharge(invoice.getInvoiceId(), metric, quantity, unitPrice);
+                BigDecimal unitPrice =
+                        invoice.getAmount().divide(BigDecimal.valueOf(quantity));
+
+                usageChargeService.createUsageCharge(
+                        invoice.getInvoiceId(),
+                        metric,
+                        quantity,
+                        unitPrice
+                );
             }
+
             return status;
+
         } catch (Exception e) {
+
             invoice.setStatus(InvoiceStatus.FAILED.name());
             invoiceRepository.save(invoice);
-            throw new RuntimeException("Payment failed: " + e.getMessage());
+
+            throw new PaymentFailedException(
+                    "Payment failed for invoice " + invoiceId
+            );
         }
     }
 
     public List<Subscription.SubscriptionResponse> getActiveSubscriptions(UUID userId) {
-        Subscription.GetUserActiveSubscriptionsResponse response =
-                subscriptionGrpcClient.getUserActiveSubscriptions(userId.toString());
-        return response.getSubscriptionsList();
+
+        try {
+            Subscription.GetUserActiveSubscriptionsResponse response =
+                    subscriptionGrpcClient
+                            .getUserActiveSubscriptions(userId.toString());
+
+            return response.getSubscriptionsList();
+
+        } catch (Exception ex) {
+            throw new SubscriptionServiceUnavailableException(
+                    "Subscription service is unavailable"
+            );
+        }
     }
 
     @Transactional
@@ -87,7 +133,7 @@ public class BillingService {
 
         invoiceRepository.findBySubscriptionId(subscriptionId)
                 .ifPresent(existing -> {
-                    throw new IllegalStateException(
+                    throw new InvalidSubscriptionStateException(
                             "Invoice already exists for subscription " + subscriptionId
                     );
                 });
@@ -115,24 +161,21 @@ public class BillingService {
 
         switch (status) {
 
-            case ACTIVE -> {
-                invoiceRepository
-                        .findBySubscriptionId(subscriptionId)
-                        .ifPresent(invoice -> {
-                            if (InvoiceStatus.DRAFT.name().equals(invoice.getStatus())) {
-                                invoice.setStatus(InvoiceStatus.ISSUED.name());
-                            }
-                        });
-            }
+            case ACTIVE -> invoiceRepository
+                    .findBySubscriptionId(subscriptionId)
+                    .ifPresent(invoice -> {
+                        if (InvoiceStatus.DRAFT.name()
+                                .equals(invoice.getStatus())) {
+                            invoice.setStatus(InvoiceStatus.ISSUED.name());
+                        }
+                    });
 
-            case CANCELED, EXPIRED -> {
-                invoiceRepository
-                        .findBySubscriptionId(subscriptionId)
-                        .ifPresent(invoice -> {
-                            invoice.setStatus(InvoiceStatus.FAILED.name());
-                            invoiceRepository.save(invoice);
-                        });
-            }
+            case CANCELED, EXPIRED -> invoiceRepository
+                    .findBySubscriptionId(subscriptionId)
+                    .ifPresent(invoice -> {
+                        invoice.setStatus(InvoiceStatus.FAILED.name());
+                        invoiceRepository.save(invoice);
+                    });
 
             case TRIALING -> {
             }
