@@ -11,7 +11,7 @@ func MakeBillingEndpoint(s service.ForwardService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ForwardRequest)
 
-		body, status, err := s.Forward(ctx, req.Body, req.Header)
+		body, status, err := s.Forward(ctx, req.Body, req.Header, req.Path, req.Method)
 		if err != nil {
 			return ForwardResponse{
 				Error:  err.Error(),

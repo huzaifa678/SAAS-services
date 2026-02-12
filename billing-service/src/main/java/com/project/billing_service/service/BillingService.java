@@ -107,7 +107,7 @@ public class BillingService {
             invoiceRepository.save(invoice);
 
             throw new PaymentFailedException(
-                    "Payment failed for invoice " + invoiceId
+                    "Payment failed for invoice " + invoiceId + e.toString()
             );
         }
     }

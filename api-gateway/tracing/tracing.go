@@ -15,7 +15,10 @@ import (
 func InitTracer(serviceName string) func(context.Context) error {
 	ctx := context.Background()
 
-	exporter, err := otlptracehttp.New(ctx)
+	exporter, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithEndpoint("localhost:43180"),
+		otlptracehttp.WithInsecure(), 
+	)
 	if err != nil {
 		log.Fatalf("failed to create OTLP exporter: %v", err)
 	}
@@ -39,4 +42,3 @@ func InitTracer(serviceName string) func(context.Context) error {
 
 	return tp.Shutdown
 }
-

@@ -24,6 +24,14 @@ public class StripePayment implements BillingInterface{
                 .setCurrency(invoice.getCurrency().toLowerCase())
                 .setPaymentMethod(paymentMethodId)
                 .setConfirm(true)
+                .setAutomaticPaymentMethods(
+                        PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
+                                .setEnabled(true)
+                                .setAllowRedirects(
+                                        PaymentIntentCreateParams.AutomaticPaymentMethods.AllowRedirects.NEVER
+                                )
+                                .build()
+                )
                 .build();
 
         PaymentIntent intent = PaymentIntent.create(params);

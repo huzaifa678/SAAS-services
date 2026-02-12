@@ -1,6 +1,7 @@
 package com.project.billing_service.controller;
 
 import com.project.billing_service.model.dtos.InvoiceDto;
+import com.project.billing_service.model.dtos.PaymentDto;
 import com.project.billing_service.model.entities.InvoiceEntity;
 import com.project.billing_service.service.BillingService;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +33,12 @@ public class BillingController {
     }
 
     @PostMapping("/invoices/{id}/pay")
-    public ResponseEntity<InvoiceEntity> payInvoice(
-            @PathVariable UUID id
+    public ResponseEntity<String> payInvoice(
+            @PathVariable UUID id,
+            @RequestBody PaymentDto dto
     ) {
-        InvoiceEntity invoice = billingService.getInvoice(id);
-        return ResponseEntity.ok(invoice);
+        String status = billingService.payInvoice(id, dto.getMethodId());
+        return ResponseEntity.ok(status);
     }
 
     @GetMapping("/active")

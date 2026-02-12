@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/go-kit/kit/log/level"
+	kitlog "github.com/go-kit/log"
 	"github.com/huzaifa678/SAAS-services/endpoint"
 	"github.com/huzaifa678/SAAS-services/service"
 	"github.com/huzaifa678/SAAS-services/tracing"
@@ -27,6 +28,16 @@ var interruptSignals = []os.Signal{
 func main() {
 	cfg := utils.Load()
 
+	var logger kitlog.Logger
+	logger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
+	logger = level.NewFilter(logger, level.AllowAll())
+	logger = kitlog.With(
+		logger,
+		"ts", kitlog.DefaultTimestampUTC,
+		"caller", kitlog.DefaultCaller,
+		"service", cfg.App.Name,
+	)
+
 	shutdownTracer := tracing.InitTracer(cfg.App.Name)
 	defer shutdownTracer(context.Background())
 
@@ -35,14 +46,14 @@ func main() {
 	
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runGoKitHTTP(ctx, waitGroup, cfg)
+	runGoKitHTTP(ctx, waitGroup, cfg, logger)
 
 	if err := waitGroup.Wait(); err != nil {
-		log.Fatalf("error during shutdown: %v", err)
+		level.Error(logger).Log("msg", "error during shutdown", "err", err)
 	}
 }
 
-func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Config) {
+func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Config, logger kitlog.Logger) {
 	subSvc := service.NewForwardService(
 		cfg.Services.Subscription.URL,
 		"subscription-service",
@@ -68,6 +79,10 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	subEndpoint := endpoint.MakeSubscriptionEndpoint(subSvc)
 	billEndpoint := endpoint.MakeBillingEndpoint(billSvc)
 
+	authEndpoint = endpoint.LoggingMiddleware(logger)(authEndpoint)
+	subEndpoint = endpoint.LoggingMiddleware(logger)(subEndpoint)
+	billEndpoint = endpoint.LoggingMiddleware(logger)(billEndpoint)
+
 	authEndpoint = endpoint.RateLimitMiddleware(10, 5)(authEndpoint)
 	subEndpoint = endpoint.RateLimitMiddleware(5, 3)(subEndpoint)
 	billEndpoint = endpoint.RateLimitMiddleware(5, 3)(billEndpoint)
@@ -78,7 +93,7 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 
 	authHandler := transport.NewGraphQLHTTPHandler(authEndpoint)
 	subHandler := transport.NewGraphQLHTTPHandler(subEndpoint)
-	billHandler := transport.NewRESTHTTPHandler(billEndpoint)
+	billHandler := transport.NewRESTHTTPHandler(billEndpoint, logger)
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/auth/", authHandler)
@@ -92,19 +107,22 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 		Handler: corsHandler,
 	}
 
-	log.Printf("API Gateway running on :%s", cfg.App.Port)
+	level.Info(logger).Log(
+		"msg", "API Gateway started",
+		"port", cfg.App.Port,
+	)
 
 	waitGroup.Go(func() error {
 		go func() {
 			<-ctx.Done()
-			log.Println("Shutting down API Gateway...")
+			level.Info(logger).Log("msg", "Shutting down API Gateway")
 
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 			if err := server.Shutdown(shutdownCtx); err != nil {
-				log.Printf("Error shutting down server: %v", err)
+				level.Error(logger).Log("msg", "server shutdown failed", "err", err)
 			} else {
-				log.Println("API Gateway stopped gracefully")
+				level.Info(logger).Log("msg", "API Gateway stopped gracefully")
 			}
 		}()
 

@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -15,11 +14,11 @@ import (
 )
 
 type ForwardService interface {
-	Forward(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error)
+	Forward(ctx context.Context, body []byte, headers http.Header, path, method string) ([]byte, int, error)
 }
 
 type forwardService struct {
-	forward func(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error)
+	forward func(ctx context.Context, body []byte, headers http.Header, path, method string) ([]byte, int, error)
 }
 
 func NewForwardService(
@@ -29,38 +28,31 @@ func NewForwardService(
 	cbCfg utils.CircuitBreakerConfig,
 ) ForwardService {
 	s := &forwardService{}
-	u := mustParseURL(baseURL)
 
-	client := kithttp.NewClient(
-		"POST",
-		u,
-		encodeRequest,
-		decodeResponse,
-	).Endpoint()
+	s.forward = func(ctx context.Context, body []byte, headers http.Header, path, method string) ([]byte, int, error) {
+		fullURL := baseURL + path
+		u, err := url.Parse(fullURL)
+		if err != nil {
+			return nil, 0, err
+		}
 
-	wrapped := circuit.WrapWithBreaker(
-		func(ctx context.Context) (interface{}, error) {
-			v := ctx.Value("request")
-			if v == nil {
-				return nil, errors.New("no request in context")
-			}
+		client := kithttp.NewClient(
+			method, 
+			u,
+			encodeRequest,
+			decodeResponse,
+		).Endpoint()
 
-			req := v.(struct {
-				Body   []byte
-				Header http.Header
-			})
-
-			return client(ctx, req)
-		},
-		serviceName,
-		cbCfg,
-	)
-
-	s.forward = func(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error) {
-		ctx = context.WithValue(ctx, "request", struct {
-			Body   []byte
-			Header http.Header
-		}{body, headers})
+		wrapped := circuit.WrapWithBreaker(
+			func(ctx context.Context) (interface{}, error) {
+				return client(ctx, struct {
+					Body   []byte
+					Header http.Header
+				}{body, headers})
+			},
+			serviceName,
+			cbCfg,
+		)
 
 		res, err := wrapped(ctx)
 		if err != nil {
@@ -78,16 +70,8 @@ func NewForwardService(
 	return s
 }
 
-func (s *forwardService) Forward(ctx context.Context, body []byte, headers http.Header) ([]byte, int, error) {
-	return s.forward(ctx, body, headers)
-}
-
-func mustParseURL(u string) *url.URL {
-	parsed, err := url.Parse(u)
-	if err != nil {
-		panic(err)
-	}
-	return parsed
+func (s *forwardService) Forward(ctx context.Context, body []byte, headers http.Header, path, method string) ([]byte, int, error) {
+	return s.forward(ctx, body, headers, path, method)
 }
 
 func encodeRequest(_ context.Context, req *http.Request, request interface{}) error {
