@@ -19,6 +19,8 @@ func DecodeGraphQLRequest(_ context.Context, r *http.Request) (interface{}, erro
 	return endpoint.ForwardRequest{
 		Body:   body,
 		Header: r.Header,
+		Path: r.URL.Path,
+		Method: r.Method,
 	}, nil
 }
 

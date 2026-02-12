@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -31,6 +32,8 @@ func NewForwardService(
 
 	s.forward = func(ctx context.Context, body []byte, headers http.Header, path, method string) ([]byte, int, error) {
 		fullURL := baseURL + path
+		log.Println("full url", fullURL)
+		log.Println("method", method)
 		u, err := url.Parse(fullURL)
 		if err != nil {
 			return nil, 0, err

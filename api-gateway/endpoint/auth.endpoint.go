@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"context"
+	"log"
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/huzaifa678/SAAS-services/service"
@@ -23,6 +24,7 @@ type ForwardResponse struct {
 func MakeAuthEndpoint(s service.ForwardService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ForwardRequest)
+		log.Println("method", req.Method)
 		body, status, err := s.Forward(ctx, req.Body, req.Header, req.Path, req.Method)
 		if err != nil {
 			return ForwardResponse{

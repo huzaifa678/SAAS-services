@@ -5,9 +5,9 @@ app:
 
 services:
   auth:
-    url: http://localhost:8080/api/auth/
+    url: http://localhost:8080
   subscription:
-    url: http://localhost:8081/api/subscription/
+    url: http://localhost:8081
   billing:
     url:  http://localhost:8082
 
