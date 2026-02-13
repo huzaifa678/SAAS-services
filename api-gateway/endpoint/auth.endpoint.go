@@ -13,6 +13,7 @@ type ForwardRequest struct {
     Header map[string][]string
 	Path   string
     Method string
+	Context context.Context
 }
 
 type ForwardResponse struct {

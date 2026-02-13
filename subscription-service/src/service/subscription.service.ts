@@ -5,7 +5,7 @@ import { SubscriptionEntity } from '@model/entities/subscription.entity';
 import { SubscriptionMapper } from '@mapper/subscription.mapper';
 import { SubscriptionRepository } from '../repository/subscription.repository';
 import { CircuitBreakerService } from '@service/circuit-breaker.service';
-import { SubscriptionEventsProducer } from 'src/events/subscription.event.producer';
+import { SubscriptionEventsProducer } from '@events/subscription.event.producer';
 
 @Injectable()
 export class SubscriptionService implements OnApplicationShutdown {

@@ -16,11 +16,14 @@ func DecodeGraphQLRequest(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 
+	ctx := context.WithValue(r.Context(), "Authorization", r.Header.Get("Authorization"))
+
 	return endpoint.ForwardRequest{
 		Body:   body,
 		Header: r.Header,
 		Path: r.URL.Path,
 		Method: r.Method,
+		Context: ctx,
 	}, nil
 }
 
