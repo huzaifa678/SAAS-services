@@ -11,6 +11,7 @@ import (
 	"github.com/go-kit/kit/log/level"
 	kitlog "github.com/go-kit/log"
 	"github.com/huzaifa678/SAAS-services/endpoint"
+	"github.com/huzaifa678/SAAS-services/interceptor"
 	"github.com/huzaifa678/SAAS-services/service"
 	"github.com/huzaifa678/SAAS-services/tracing"
 	"github.com/huzaifa678/SAAS-services/transport"
@@ -54,6 +55,9 @@ func main() {
 }
 
 func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Config, logger kitlog.Logger) {
+
+	jwtSecret := cfg.Jwt.Secret
+
 	subSvc := service.NewForwardService(
 		cfg.Services.Subscription.URL,
 		"subscription-service",
@@ -86,6 +90,9 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	authEndpoint = endpoint.RateLimitMiddleware(10, 5)(authEndpoint)
 	subEndpoint = endpoint.RateLimitMiddleware(5, 3)(subEndpoint)
 	billEndpoint = endpoint.RateLimitMiddleware(5, 3)(billEndpoint)
+
+	subEndpoint = interceptor.JWTMiddleware(jwtSecret)(subEndpoint)
+	billEndpoint = interceptor.JWTMiddleware(jwtSecret)(billEndpoint)
 
 	authEndpoint = endpoint.TracedEndpoint("AuthEndpoint", authEndpoint)
 	subEndpoint = endpoint.TracedEndpoint("SubscriptionEndpoint", subEndpoint)

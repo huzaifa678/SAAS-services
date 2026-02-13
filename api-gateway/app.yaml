@@ -11,6 +11,9 @@ services:
   billing:
     url:  http://localhost:8082
 
+jwt:
+  secret: supersecret
+
 cors:
   allowedOrigins:
     - http://localhost:3000   #configuration for possible frontend client

@@ -24,6 +24,10 @@ type Config struct {
 		Port string `mapstructure:"port"`
 	} `mapstructure:"app"`
 
+	Jwt struct {
+		Secret string `mapstructure:"secret"`
+	}
+
 	Services struct {
 		Auth struct {
 			URL string `mapstructure:"url"`
