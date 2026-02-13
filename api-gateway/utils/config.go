@@ -28,6 +28,10 @@ type Config struct {
 		Secret string `mapstructure:"secret"`
 	}
 
+	Redis struct {
+		URL string `mapstructure:"url"`
+	}
+
 	Services struct {
 		Auth struct {
 			URL string `mapstructure:"url"`

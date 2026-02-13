@@ -11,6 +11,9 @@ services:
   billing:
     url:  http://localhost:8082
 
+redis:
+  url: http://localhost:6379
+
 jwt:
   secret: supersecret
 

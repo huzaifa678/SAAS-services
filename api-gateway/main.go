@@ -16,6 +16,7 @@ import (
 	"github.com/huzaifa678/SAAS-services/tracing"
 	"github.com/huzaifa678/SAAS-services/transport"
 	"github.com/huzaifa678/SAAS-services/utils"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -56,6 +57,10 @@ func main() {
 
 func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Config, logger kitlog.Logger) {
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: cfg.Redis.URL, 
+	})
+
 	jwtSecret := cfg.Jwt.Secret
 
 	subSvc := service.NewForwardService(
@@ -87,9 +92,9 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	subEndpoint = endpoint.LoggingMiddleware(logger)(subEndpoint)
 	billEndpoint = endpoint.LoggingMiddleware(logger)(billEndpoint)
 
-	authEndpoint = endpoint.RateLimitMiddleware(10, 5)(authEndpoint)
-	subEndpoint = endpoint.RateLimitMiddleware(5, 3)(subEndpoint)
-	billEndpoint = endpoint.RateLimitMiddleware(5, 3)(billEndpoint)
+	authEndpoint = endpoint.RateLimitMiddleware(redisClient, 10, 5, "auth", logger)(authEndpoint)
+	subEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "sub", logger)(subEndpoint)
+	billEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "bill", logger)(billEndpoint)
 
 	subEndpoint = interceptor.JWTMiddleware(jwtSecret)(subEndpoint)
 	billEndpoint = interceptor.JWTMiddleware(jwtSecret)(billEndpoint)
