@@ -186,19 +186,6 @@ services:
       - "8000:8000"
     volumes:
       - ./chroma-data:/data
-
-  airflow:
-    image: apache/airflow:2.7.3
-    container_name: airflow
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__FERNET_KEY: 'some_fernet_key_here'
-      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
-    volumes:
-      - ./airflow/dags:/opt/airflow/dags
-    ports:
-      - "8001:8001"
-
   
   mlflow:
     image: cr.fly.dev/mlflow/mlflow:2.7.0
