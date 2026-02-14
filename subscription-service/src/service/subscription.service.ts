@@ -3,7 +3,7 @@ import { CreateSubscriptionInput } from '@model/dtos/create-subscription.dto';
 import { UpdateSubscriptionInput } from '@model/dtos/update-subscription.dto';
 import { SubscriptionEntity } from '@model/entities/subscription.entity';
 import { SubscriptionMapper } from '@mapper/subscription.mapper';
-import { SubscriptionRepository } from '../repository/subscription.repository';
+import { SubscriptionRepository } from '@repository/subscription.repository';
 import { CircuitBreakerService } from '@service/circuit-breaker.service';
 import { SubscriptionEventsProducer } from '@events/subscription.event.producer';
 

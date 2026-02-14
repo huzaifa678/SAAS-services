@@ -12,7 +12,7 @@ services:
     url:  http://localhost:8082
 
 redis:
-  url: http://localhost:6379
+  url: localhost:6379
 
 jwt:
   secret: supersecret

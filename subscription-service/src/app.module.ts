@@ -3,10 +3,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
-import { SubscriptionModule } from './subscription.module.js';
+import { SubscriptionModule } from './subscription.module';
 import { SubscriptionEntity } from '@model/entities/subscription.entity'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { KafkaModule } from './kafka.module.js';
+import { KafkaModule } from './kafka.module';
 
 @Module({
   imports: [
