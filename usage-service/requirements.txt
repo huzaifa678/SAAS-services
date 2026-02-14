@@ -1,0 +1,21 @@
+# Web/API
+fastapi
+uvicorn[standard]
+
+# Kafka consumer
+kafka-python==2.1.2
+
+# Data processing / MLOps
+pandas
+prefect
+mlflow==2.7.0
+
+# LLM / RAG
+langchain
+openai
+chromadb
+sentence-transformers
+
+# Utilities
+python-dotenv
+requests
