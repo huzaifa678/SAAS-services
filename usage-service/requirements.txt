@@ -3,7 +3,12 @@ fastapi
 uvicorn[standard]
 
 # Kafka consumer
-kafka-python==2.1.2
+confluent-kafka 
+fastavro
+
+# DB migrations
+alembic
+psycopg2-binary
 
 # Data processing / MLOps
 pandas

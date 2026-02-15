@@ -188,7 +188,7 @@ services:
       - ./chroma-data:/data
   
   mlflow:
-    image: cr.fly.dev/mlflow/mlflow:2.7.0
+    image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
@@ -196,11 +196,25 @@ services:
       - "5000:5000"
     volumes:
       - ./mlflow-data:/mlflow
+    command: mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow
+
+  usage-postgres:
+    image: postgres:16-alpine
+    container_name: usage-postgres
+    environment:
+      POSTGRES_USER: usage_user
+      POSTGRES_PASSWORD: usage_password
+      POSTGRES_DB: usage_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - usage_postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
   subscription_postgres_data:
   billing_postgres_data:
+  usage_postgres_data:
   grafana_data:
   kafka_data:
   tempo_data:
