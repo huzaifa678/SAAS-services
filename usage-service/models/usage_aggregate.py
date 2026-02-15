@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Numeric, TIMESTAMP, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
 from . import Base
 
 class UsageAggregate(Base):

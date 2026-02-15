@@ -185,7 +185,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./chroma-data:/data
+      - chroma_data:/data
   
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
@@ -195,7 +195,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./mlflow-data:/mlflow
+      - mlflow_data:/mlflow
     command: mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow
 
   usage-postgres:
@@ -215,6 +215,8 @@ volumes:
   subscription_postgres_data:
   billing_postgres_data:
   usage_postgres_data:
+  mlflow_data:
+  chroma_data:
   grafana_data:
   kafka_data:
   tempo_data:
