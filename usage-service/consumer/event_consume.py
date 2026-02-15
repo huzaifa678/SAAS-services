@@ -1,17 +1,15 @@
 import os
+from datetime import datetime
+from decimal import Decimal
 from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
-from decimal import Decimal
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models.usage_event import UsageEvent
 
 load_dotenv()
-
-schema_registry_conf = {'url': os.getenv("SCHEMA_REGISTRY_URL")}
-schema_registry_client = SchemaRegistryClient(schema_registry_conf)
-
-with open("avro/usage_event.avsc", "r") as f:
-    avro_schema_str = f.read()
 
 def decimal_deserializer(obj, ctx):
     if isinstance(obj, bytes):
@@ -19,34 +17,80 @@ def decimal_deserializer(obj, ctx):
         return Decimal(unscaled) / (10 ** 2)
     return obj
 
-avro_deserializer = AvroDeserializer(
-    avro_schema_str,
-    schema_registry_client=schema_registry_client,
-    from_dict=decimal_deserializer
-)
 
-consumer_conf = {
-    "bootstrap.servers": os.getenv("KAFKA_BOOTSTRAP_SERVERS"),
-    "key.deserializer": str,
-    "value.deserializer": avro_deserializer,
-    "group.id": "usage-service",
-    "auto.offset.reset": "earliest"
-}
+def consume_kafka_batch():
+    schema_registry_conf = {
+        "url": os.getenv("SCHEMA_REGISTRY_URL")
+    }
 
-consumer = DeserializingConsumer(consumer_conf)
-consumer.subscribe(["billing.usage-charge.created"])
+    schema_registry_client = SchemaRegistryClient(schema_registry_conf)
 
-try:
-    while True:
-        msg = consumer.poll(1.0)
-        if msg is None:
-            continue
-        if msg.error():
-            print(f"Consumer error: {msg.error()}")
-            continue
+    with open("/opt/airflow/avro/usage_event.avsc", "r") as f:
+        avro_schema_str = f.read()
 
-        value = msg.value()
-        print(f"Received: {value}")
+    avro_deserializer = AvroDeserializer(
+        avro_schema_str,
+        schema_registry_client=schema_registry_client,
+        from_dict=decimal_deserializer
+    )
 
-finally:
-    consumer.close()
+    consumer_conf = {
+        "bootstrap.servers": os.getenv("KAFKA_BOOTSTRAP_SERVERS"),
+        "group.id": "usage-service",
+        "auto.offset.reset": "earliest",
+        "enable.auto.commit": False,
+        "value.deserializer": avro_deserializer,
+    }
+
+    consumer = DeserializingConsumer(consumer_conf)
+    consumer.subscribe(["billing.usage-charge.created"])
+
+    engine = create_engine(os.getenv("DATABASE_URL"))
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+
+    max_messages = 100
+    processed = 0
+
+    try:
+        while processed < max_messages:
+            msg = consumer.poll(1.0)
+
+            if msg is None:
+                break
+
+            if msg.error():
+                print(f"Kafka error: {msg.error()}")
+                continue
+
+            event = msg.value()
+
+            usage_event = UsageEvent(
+                id=event["usageChargeId"],
+                invoice_id=event["invoiceId"],
+                metric=event["metric"],
+                quantity=event["quantity"],
+                unit_price=event["unitPrice"],
+                total_price=event["totalPrice"],
+                created_at=datetime.fromtimestamp(
+                    event["createdAt"] / 1000
+                ),
+                embedding_processed=False
+            )
+
+            db.merge(usage_event)  # idempotent insert
+            processed += 1
+
+        db.commit()
+
+        consumer.commit()
+
+        print(f"Processed {processed} messages")
+
+    except Exception as e:
+        db.rollback()
+        raise e
+
+    finally:
+        db.close()
+        consumer.close()

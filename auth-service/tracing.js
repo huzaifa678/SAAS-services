@@ -6,7 +6,6 @@ import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 
 
-
 const { Resource } = pkg
 const traceExporter = new OTLPTraceExporter({
   url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:43180/v1/traces',

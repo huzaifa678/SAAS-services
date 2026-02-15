@@ -5,7 +5,7 @@ from . import Base
 class UsageAggregate(Base):
     __tablename__ = "usage_aggregates"
 
-    customer_id = Column(UUID(as_uuid=True), primary_key=True)
+    customer_id = Column('customer_id', UUID(as_uuid=True),nullable=False, primary_key=True)
     metric = Column(String(64), primary_key=True)
     daily_total = Column(Numeric(19,4), nullable=False, default=0)
     monthly_total = Column(Numeric(19,4), nullable=False, default=0)
