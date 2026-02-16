@@ -54,7 +54,6 @@ func EncodeGraphQLResponse(_ context.Context, w http.ResponseWriter, response in
 // @Success 200 {object} endpoint.ForwardResponseSwagger
 // @Failure 503 {object} endpoint.ForwardResponseSwagger
 // @Router /api/auth/ [post]
-
 // GraphQLSubscription godoc
 // @Summary Subscription GraphQL endpoint
 // @Description Forwards GraphQL requests to the Subscription Service
@@ -66,7 +65,6 @@ func EncodeGraphQLResponse(_ context.Context, w http.ResponseWriter, response in
 // @Success 200 {object} endpoint.ForwardResponseSwagger
 // @Failure 503 {object} endpoint.ForwardResponseSwagger
 // @Router /api/subscription/ [post]
-
 func NewGraphQLHTTPHandler(endpoint kitendpoint.Endpoint) http.Handler {
 	return kithttp.NewServer(
 		endpoint,

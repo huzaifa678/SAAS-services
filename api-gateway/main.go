@@ -19,6 +19,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 	httpSwagger "github.com/swaggo/http-swagger"
+	_ "github.com/huzaifa678/SAAS-services/docs"
 )
 
 var interruptSignals = []os.Signal{
@@ -118,7 +119,9 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	mux.Handle("/api/auth/", authHandler)
 	mux.Handle("/api/subscription/", subHandler)
 	mux.Handle("/api/billing/", billHandler)
-	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+	mux.Handle("/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:9000/swagger/doc.json"),
+	))
 
 
 	corsHandler := transport.CORSMiddleware(cfg.CORS.AllowedOrigins)(mux)

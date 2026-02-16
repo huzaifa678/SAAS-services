@@ -65,7 +65,6 @@ func EncodeRESTRequest(_ context.Context, w http.ResponseWriter, response interf
 // @Router /api/billing/{path} [post]
 // @Router /api/billing/{path} [put]
 // @Router /api/billing/{path} [delete]
-
 func NewRESTHTTPHandler(endpoint kitendpoint.Endpoint, logger kitlog.Logger) http.Handler {
 	return kithttp.NewServer(
 		endpoint,
