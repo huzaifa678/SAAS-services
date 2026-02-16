@@ -7,6 +7,8 @@ import { SubscriptionModule } from './subscription.module';
 import { SubscriptionEntity } from '@model/entities/subscription.entity'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { KafkaModule } from './kafka.module';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { KafkaModule } from './kafka.module';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       path: '/api/subscription/',
+      plugins: [ApolloServerPluginLandingPageLocalDefault()]
     }),
   ],
 })

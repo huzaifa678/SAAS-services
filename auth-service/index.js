@@ -8,7 +8,6 @@ import http from 'http';
 const app = express();
 const metricsApp = express();
 
-
 const METRICS_PORT = 4001;
 
 app.use(express.json());

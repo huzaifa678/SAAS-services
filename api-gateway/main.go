@@ -18,6 +18,7 @@ import (
 	"github.com/huzaifa678/SAAS-services/utils"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 var interruptSignals = []os.Signal{
@@ -26,6 +27,12 @@ var interruptSignals = []os.Signal{
 	syscall.SIGHUP,
 	syscall.SIGQUIT,
 }
+
+// @title SAAS API Gateway
+// @version 1.0
+// @description API Gateway for Auth, Subscription and Billing Services
+// @host localhost:9000
+// @BasePath /
 
 func main() {
 	cfg := utils.Load()
@@ -111,6 +118,8 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	mux.Handle("/api/auth/", authHandler)
 	mux.Handle("/api/subscription/", subHandler)
 	mux.Handle("/api/billing/", billHandler)
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+
 
 	corsHandler := transport.CORSMiddleware(cfg.CORS.AllowedOrigins)(mux)
 

@@ -48,6 +48,24 @@ func EncodeRESTRequest(_ context.Context, w http.ResponseWriter, response interf
 	return err
 }
 
+// BillingForward godoc
+// @Summary Billing REST endpoint
+// @Description Forwards REST requests to Billing Service through API Gateway
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param path path string false "Dynamic billing route path"
+// @Param request body object false "Billing request payload"
+// @Success 200 {object} endpoint.ForwardResponseSwagger
+// @Failure 400 {object} endpoint.ForwardResponseSwagger
+// @Failure 401 {object} endpoint.ForwardResponseSwagger
+// @Failure 503 {object} endpoint.ForwardResponseSwagger
+// @Router /api/billing/{path} [get]
+// @Router /api/billing/{path} [post]
+// @Router /api/billing/{path} [put]
+// @Router /api/billing/{path} [delete]
+
 func NewRESTHTTPHandler(endpoint kitendpoint.Endpoint, logger kitlog.Logger) http.Handler {
 	return kithttp.NewServer(
 		endpoint,

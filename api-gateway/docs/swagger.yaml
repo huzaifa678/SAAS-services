@@ -1,0 +1,9 @@
+basePath: /
+host: localhost:9000
+info:
+  contact: {}
+  description: API Gateway for Auth, Subscription and Billing Services
+  title: SAAS API Gateway
+  version: "1.0"
+paths: {}
+swagger: "2.0"

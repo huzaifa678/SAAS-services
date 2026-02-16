@@ -4,6 +4,7 @@ import typeDefs from '../schema/auth.schema.js'
 import { resolvers } from '../resolvers/auth.resolver.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import jwt from 'jsonwebtoken';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 const router = express.Router();
 
@@ -26,7 +27,11 @@ router.use(async (req, res, next) => {
 router.post('/', async (req, res) => {
   try {
     const schema = makeExecutableSchema({ typeDefs, resolvers });
-    const server = new ApolloServer({ schema });
+    const server = new ApolloServer({ schema,
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault(), 
+      ],
+    });
     await server.start();
 
     const { query, variables } = req.body;

@@ -43,6 +43,30 @@ func EncodeGraphQLResponse(_ context.Context, w http.ResponseWriter, response in
 	return err
 }
 
+// GraphQLAuth godoc
+// @Summary Auth GraphQL endpoint
+// @Description Forwards GraphQL requests to the Auth Service
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param Authorization header string false "Bearer JWT token"
+// @Param request body object true "GraphQL query payload"
+// @Success 200 {object} endpoint.ForwardResponseSwagger
+// @Failure 503 {object} endpoint.ForwardResponseSwagger
+// @Router /api/auth/ [post]
+
+// GraphQLSubscription godoc
+// @Summary Subscription GraphQL endpoint
+// @Description Forwards GraphQL requests to the Subscription Service
+// @Tags Subscription
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param request body object true "GraphQL query payload"
+// @Success 200 {object} endpoint.ForwardResponseSwagger
+// @Failure 503 {object} endpoint.ForwardResponseSwagger
+// @Router /api/subscription/ [post]
+
 func NewGraphQLHTTPHandler(endpoint kitendpoint.Endpoint) http.Handler {
 	return kithttp.NewServer(
 		endpoint,
