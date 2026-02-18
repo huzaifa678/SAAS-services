@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: embedding-job
+  namespace: airflow
+spec:
+  template:
+    spec:
+      containers:
+        - name: embedding
+          image: huzaifagill234/embedding-job:latest
+          imagePullPolicy: Always
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: DATABASE_URL
+            - name: CHROMA_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: CHROMA_HOST
+            - name: CHROMA_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: CHROMA_PORT
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: OPENAI_API_KEY
+      restartPolicy: Never
+  backoffLimit: 3

@@ -1,0 +1,14 @@
+redis:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: redis
+    tag: 7
+  master:
+    command:
+      - redis-server
+    args:
+      - --appendonly
+      - "yes"
+  password: ""
+  usePassword: false

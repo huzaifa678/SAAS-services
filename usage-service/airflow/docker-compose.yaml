@@ -49,7 +49,9 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider distributions you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:3.1.7}
+  build:
+    context: .
+    dockerfile: Dockerfile
   # build: .
   env_file:
     - ${ENV_FILE_PATH:-.env}
@@ -74,11 +76,16 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     # The following line can be used to set a custom config file, stored in the local config folder
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
+    PYTHONPATH: /opt/airflow
   volumes:
-    - ${AIRFLOW_PROJ_DIR}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR}/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR}/config:/opt/airflow/config
-    - ${AIRFLOW_PROJ_DIR}/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR:-.}/consumer:/opt/airflow/consumer
+    - ${AIRFLOW_PROJ_DIR:-.}/aggregation:/opt/airflow/aggregation
+    - ${AIRFLOW_PROJ_DIR:-.}/embed:/opt/airflow/embed
+    - ${AIRFLOW_PROJ_DIR:-.}/avro:/opt/airflow/avro
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -94,6 +101,8 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+    networks:
+      - usage-network
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
@@ -108,7 +117,9 @@ services:
     # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
     image: redis:7.2-bookworm
     expose:
-      - 6380
+      - 6379
+    networks:
+      - usage-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -122,6 +133,8 @@ services:
     command: api-server
     ports:
       - "8085:8080"
+    networks:
+      - usage-network
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8085/api/v2/version"]
       interval: 30s
@@ -137,6 +150,8 @@ services:
   airflow-scheduler:
     <<: *airflow-common
     command: scheduler
+    networks:
+      - usage-network
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s
@@ -152,6 +167,8 @@ services:
   airflow-dag-processor:
     <<: *airflow-common
     command: dag-processor
+    networks:
+      - usage-network
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
       interval: 30s
@@ -167,6 +184,8 @@ services:
   airflow-worker:
     <<: *airflow-common
     command: celery worker
+    networks:
+      - usage-network
     healthcheck:
       # yamllint disable rule:line-length
       test:
@@ -192,6 +211,8 @@ services:
   airflow-triggerer:
     <<: *airflow-common
     command: triggerer
+    networks:
+      - usage-network
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
       interval: 30s
@@ -285,6 +306,8 @@ services:
         echo "Files in shared volumes:"
         echo
         ls -la /opt/airflow/{logs,dags,plugins,config}
+    networks:
+      - usage-network
 
     # yamllint enable rule:line-length
     environment:
@@ -335,3 +358,6 @@ services:
 
 volumes:
   postgres-db-volume:
+networks:
+  usage-network:
+    external: true

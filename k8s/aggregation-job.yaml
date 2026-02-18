@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aggregation-job
+  namespace: airflow
+spec:
+  template:
+    spec:
+      containers:
+        - name: aggregation
+          image: huzaifagill234/aggregation-job:latest
+          imagePullPolicy: Always
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: DATABASE_URL
+      restartPolicy: Never
+  backoffLimit: 3

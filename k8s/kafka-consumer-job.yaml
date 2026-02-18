@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-consumer-job
+  namespace: airflow
+spec:
+  template:
+    spec:
+      containers:
+        - name: kafka-consumer
+          image: huzaifagill234/kafka-consumer:latest
+          imagePullPolicy: Always
+          env:
+            - name: SCHEMA_REGISTRY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: SCHEMA_REGISTRY_URL
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: KAFKA_BOOTSTRAP_SERVERS
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secrets
+                  key: DATABASE_URL
+      restartPolicy: Never
+  backoffLimit: 3

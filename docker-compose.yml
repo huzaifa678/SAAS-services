@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   auth-postgres:
@@ -23,7 +22,7 @@ services:
     ports:
       - "5433:5432"   
     volumes:
-      - billing_postgres_data:/var/lib/postgresql/data
+      - subscription_postgres_data:/var/lib/postgresql/data
 
   billing-postgres:
     image: postgres:16-alpine
@@ -70,14 +69,6 @@ services:
     volumes:
       - ./docker/loki:/etc/loki
 
-  promtail:
-    image: grafana/promtail:2.9.0
-    container_name: promtail
-    volumes:
-      - /var/log:/var/log
-      - ./docker/promtail:/etc/promtail
-    command: -config.file=/etc/promtail/promtail-config.yaml
-
   tempo:
     image: grafana/tempo:2.4.1
     container_name: tempo
@@ -117,7 +108,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
 
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092, PLAINTEXT_HOST://kafka:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://kafka:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
@@ -130,6 +121,8 @@ services:
 
     volumes:
       - kafka_data:/var/lib/kafka/data
+    networks:
+      - usage-network
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.6.1
@@ -142,6 +135,8 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
     ports:
       - "9094:9094"
+    networks:
+      - usage-network
 
   
   kafka-ui:
@@ -209,6 +204,8 @@ services:
       - "5435:5432"
     volumes:
       - usage_postgres_data:/var/lib/postgresql/data
+    networks:
+      - usage-network
 
 volumes:
   postgres_data:
@@ -221,4 +218,8 @@ volumes:
   kafka_data:
   tempo_data:
   otel_data:
+
+networks:
+  usage-network:
+    external: true
 

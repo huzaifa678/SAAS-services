@@ -22,7 +22,7 @@ export class SubscriptionEntity {
   userId!: string;
 
   @Field()
-  @Column()
+  @Column('uuid')
   planId!: string;
 
   @Field(() => SubscriptionStatus)
@@ -38,7 +38,7 @@ export class SubscriptionEntity {
   currentPeriodEnd!: Date;
 
   @Field()
-  @Column({ default: false })
+  @Column({ type: 'boolean', default: false })
   cancelAtPeriodEnd!: boolean;
 
   @Field(() => GraphQLISODateTime)

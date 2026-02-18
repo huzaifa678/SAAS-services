@@ -7,7 +7,6 @@ import { SubscriptionModule } from './subscription.module';
 import { SubscriptionEntity } from '@model/entities/subscription.entity'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { KafkaModule } from './kafka.module';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 
 @Module({
@@ -20,7 +19,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [SubscriptionEntity],
-      synchronize: true, 
+      synchronize: false, 
       logging: true,
       extra: {
         max: 10,
@@ -34,7 +33,6 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       path: '/api/subscription/',
-      plugins: [ApolloServerPluginLandingPageLocalDefault()]
     }),
   ],
 })
