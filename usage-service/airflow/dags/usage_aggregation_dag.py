@@ -7,7 +7,7 @@ from aggregation.usage_aggregate import aggregate_usage_events
 with DAG(
     dag_id="usage_aggregation",
     start_date=datetime(2024, 1, 1),
-    schedule_interval="*/1 * * * *",  
+    schedule="*/1 * * * *",  
     catchup=False,
     max_active_runs=1,
 ) as dag:

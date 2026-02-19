@@ -8,7 +8,7 @@ from embed.chroma_store import process_embeddings
 with DAG(
     dag_id="usage_rag_embedding",
     start_date=datetime(2024, 1, 1),
-    schedule_interval="*/1 * * * *",
+    schedule="*/1 * * * *",
     catchup=False,
     max_active_runs=1,
 ) as dag:

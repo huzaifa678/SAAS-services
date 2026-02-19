@@ -29,8 +29,8 @@ def consume_kafka_batch():
         avro_schema_str = f.read()
 
     avro_deserializer = AvroDeserializer(
-        avro_schema_str,
         schema_registry_client=schema_registry_client,
+        schema_str=avro_schema_str,
         from_dict=decimal_deserializer
     )
 

@@ -2076,54 +2076,24 @@ externalDatabase:
   ## - allowed values: "mysql", "postgres"
   ##
   type: postgres
-
-  ## the host of the external database
-  ##
   host: airflow-postgres.airflow.svc.cluster.local
-
-  ## the port of the external database
-  ##
   port: 5432
-
-  ## the database/scheme to use within the external database
-  ##
   database: airflow
-
-  ## the username for the external database
-  ##
   user: airflow
-
-  ## the name of a pre-created secret containing the external database user
-  ## - if set, this overrides `externalDatabase.user`
-  ##
-  userSecret: ""
-
-  ## the key within `externalDatabase.userSecret` containing the user string
-  ##
+  password: ""   
+  userSecret: ""     
   userSecretKey: "postgresql-user"
-
-  ## the password for the external database
-  ## - [WARNING] to avoid storing the password in plain-text within your values,
-  ##   create a Kubernetes secret and use `externalDatabase.passwordSecret`
-  ##
-  password: ""
-
-  ## the name of a pre-created secret containing the external database password
-  ## - if set, this overrides `externalDatabase.password`
-  ##
-  passwordSecret: ""
-
-  ## the key within `externalDatabase.passwordSecret` containing the password string
-  ##
+  passwordSecret: "airflow-postgres-secret" 
   passwordSecretKey: "postgresql-password"
+  properties: ""     
 
-  ## extra connection-string properties for the external database
-  ##
-  ## ____ EXAMPLE _______________
-  ##   # require SSL (only for Postgres)
-  ##   properties: "?sslmode=require"
-  ##
-  properties: ""
+# extraEnv:
+#   - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+#     value: postgresql+psycopg2://airflow:airflow@airflow-postgres.airflow.svc.cluster.local:5432/airflow
+#   - name: AIRFLOW__CELERY__RESULT_BACKEND
+#     value: db+postgresql://airflow:airflow@airflow-postgres.airflow.svc.cluster.local:5432/airflow
+#   - name: AIRFLOW__CELERY__BROKER_URL
+#     value: redis://:@airflow-redis.airflow.svc.cluster.local:6379/1
 
 ###################################
 ## DATABASE | Embedded Redis
@@ -2140,39 +2110,13 @@ redis:
 ## DATABASE | External Redis
 ###################################
 externalRedis:
-  ## the host of the external redis
-  ##
   host: airflow-redis.airflow.svc.cluster.local
-
-  ## the port of the external redis
-  ##
   port: 6379
-
-  ## the database number to use within the external redis
-  ##
   databaseNumber: 1
-
-  ## the password for the external redis
-  ## - [WARNING] to avoid storing the password in plain-text within your values,
-  ##   create a Kubernetes secret and use `externalRedis.passwordSecret`
-  ##
-  password: ""
-
-  ## the name of a pre-created secret containing the external redis password
-  ## - if set, this overrides `externalRedis.password`
-  ##
-  passwordSecret: ""
-
-  ## the key within `externalRedis.passwordSecret` containing the password string
-  ##
-  passwordSecretKey: "redis-password"
-
-  ## extra connection-string properties for the external redis
-  ##
-  ## ____ EXAMPLE _______________
-  ##   properties: "?ssl_cert_reqs=CERT_OPTIONAL"
-  ##
-  properties: ""
+  password: ""        
+  passwordSecret: airflow-postgres-secret
+  passwordSecretKey: postgresql-password
+  properties: "" 
 
 ###################################
 ## CONFIG | ServiceMonitor (Prometheus Operator)
