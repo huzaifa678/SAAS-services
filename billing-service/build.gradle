@@ -122,12 +122,18 @@ avro {
     createSetters = false
 }
 
+tasks.withType(com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask).configureEach {
+    outputDir = file("$projectDir/src/main/generated/avro")
+}
+
 sourceSets {
     main {
         java {
-            srcDirs += "$buildDir/generated/sources/proto/main/java"
-            srcDirs += "$buildDir/generated/sources/proto/main/grpc"
-            srcDirs += "$buildDir/generated-main-avro-java"
+            srcDirs += [
+                    srcDirs += "$buildDir/generated/sources/proto/main/java",
+                    srcDirs += "$buildDir/generated/sources/proto/main/grpc",
+                    "src/main/generated/avro"
+            ]
         }
     }
 }

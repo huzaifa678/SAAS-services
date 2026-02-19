@@ -2066,82 +2066,7 @@ postgresql:
   ## - [WARNING] consider using an external database with `externalDatabase.*`
   ## - set to `false` if using `externalDatabase.*`
   ##
-  enabled: true
-
-  ## configs for the postgres container image
-  ##
-  image:
-    registry: ghcr.io
-    repository: airflow-helm/postgresql-bitnami
-    tag: 11.22-patch.0
-    pullPolicy: IfNotPresent
-
-  ## the postgres database to use
-  ##
-  postgresqlDatabase: airflow
-
-  ## the postgres user to create
-  ##
-  postgresqlUsername: postgres
-
-  ## the postgres user's password
-  ##
-  postgresqlPassword: airflow
-
-  ## the name of a pre-created secret containing the postgres password
-  ##
-  existingSecret: ""
-
-  ## the key within `postgresql.existingSecret` containing the password string
-  ##
-  existingSecretKey: "postgresql-password"
-
-  ## configs for the PVC of postgresql
-  ##
-  persistence:
-    ## if postgres will use Persistent Volume Claims to store data
-    ## - [WARNING] if false, data will be LOST as postgres Pods restart
-    ##
-    enabled: true
-
-    ## the name of the StorageClass used by the PVC
-    ##
-    storageClass: ""
-
-    ## the access modes of the PVC
-    ##
-    accessModes:
-      - ReadWriteOnce
-
-    ## the size of PVC to request
-    ##
-    size: 8Gi
-
-  ## configs for the postgres StatefulSet
-  ##
-  master:
-    ## the nodeSelector configs for the postgres Pods
-    ## - docs for nodeSelector:
-    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
-    ##
-    nodeSelector: {}
-
-    ## the affinity configs for the postgres Pods
-    ## - spec for Affinity:
-    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#affinity-v1-core
-    ##
-    affinity: {}
-
-    ## the toleration configs for the postgres Pods
-    ## - spec for Toleration:
-    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#toleration-v1-core
-    ##
-    tolerations: []
-
-    ## annotations for the postgres Pods
-    ##
-    podAnnotations:
-      cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  enabled: false
 
 ###################################
 ## DATABASE | External Database
@@ -2154,7 +2079,7 @@ externalDatabase:
 
   ## the host of the external database
   ##
-  host: localhost
+  host: airflow-postgres.airflow.svc.cluster.local
 
   ## the port of the external database
   ##
