@@ -185,6 +185,7 @@ services:
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow
+    user: root
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
     ports:
