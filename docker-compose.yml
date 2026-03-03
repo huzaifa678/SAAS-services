@@ -208,6 +208,30 @@ services:
     networks:
       - usage-network
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak-saas
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    ports:
+      - "8080:8079"
+    depends_on:
+      - keycloak-postgres
+
+  keycloak-postgres:
+    image: postgres:16-alpine
+    container_name: keycloak-postgres-saas
+    environment:
+      POSTGRES_USER: keycloak_user
+      POSTGRES_PASSWORD: keycloak_password
+      POSTGRES_DB: keycloak_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - keycloak_postgres_data:/var/lib/postgresql/data
+
 volumes:
   postgres_data:
   subscription_postgres_data:
@@ -219,6 +243,7 @@ volumes:
   kafka_data:
   tempo_data:
   otel_data:
+  keycloak_postgres_data:
 
 networks:
   usage-network:
