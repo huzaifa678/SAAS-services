@@ -8,6 +8,7 @@ import (
 	"github.com/MicahParks/keyfunc/v2"
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/golang-jwt/jwt/v5"
+	endpoint "github.com/huzaifa678/SAAS-services/endpoint"
 )
 
 // KeycloakClaims is a generic claims struct you can expand
@@ -27,18 +28,14 @@ func KeycloakMiddleware(jwksURL string) (kitendpoint.Middleware, error) {
 	return func(next kitendpoint.Endpoint) kitendpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
 			// Expecting ForwardRequest from your endpoints
-			req, ok := request.(map[string]interface{})
+			req, ok := request.(endpoint.ForwardRequest)
 			if !ok {
-				return nil, errors.New("invalid request type")
-			}
-
-			authHeaderRaw, ok := req["headers"].(map[string][]string)
-			if !ok {
-				return nil, errors.New("missing headers")
+				return nil, errors.New("invalid request type, expected ForwardRequest")
 			}
 
 			authHeader := ""
-			if vals, ok := authHeaderRaw["Authorization"]; ok && len(vals) > 0 {
+
+			if vals, ok := req.Header["Authorization"]; ok && len(vals) > 0 {
 				authHeader = vals[0]
 			}
 
