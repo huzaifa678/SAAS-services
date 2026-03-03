@@ -32,6 +32,10 @@ type Config struct {
 		URL string `mapstructure:"url"`
 	}
 
+	Keycloak struct {
+		JWKSURL string `mapstructure:"jwksURL"`
+	}
+
 	Services struct {
 		Auth struct {
 			URL string `mapstructure:"url"`
