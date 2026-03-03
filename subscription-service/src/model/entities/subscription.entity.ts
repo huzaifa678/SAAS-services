@@ -22,7 +22,7 @@ export class SubscriptionEntity {
   userId!: string;
 
   @Field()
-  @Column('uuid')
+  @Column('text')
   planId!: string;
 
   @Field(() => SubscriptionStatus)
