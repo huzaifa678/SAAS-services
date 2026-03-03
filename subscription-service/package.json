@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "proto:gen": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/pb/ --ts_proto_opt=nestJs=true,outputClientImpl=grpc-js,outputServices=grpc-js src/proto/*.proto",
-    "migrate": "pnpm dlx tsx node_modules/typeorm/cli.js migration:run -d ./data-source.ts"
+    "migrate": "pnpm dlx tsx node_modules/typeorm/cli.js migration:generate -d ./data-source.ts ./migrations/CreateSubscriptionsTable",
+    "run-migrations": "pnpm dlx tsx node_modules/typeorm/cli.js migration:run -d ./data-source.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.3.0",
