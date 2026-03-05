@@ -22,7 +22,10 @@ import { KafkaModule } from './kafka.module';
       synchronize: false, 
       logging: true,
       extra: {
-        max: 10,
+        max: 20,                 
+        min: 5,                  
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
       },
     }),
     TypeOrmModule.forFeature([SubscriptionEntity]), 
