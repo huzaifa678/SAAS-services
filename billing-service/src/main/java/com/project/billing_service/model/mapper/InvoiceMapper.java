@@ -14,7 +14,6 @@ public class InvoiceMapper extends BaseMapper<InvoiceEntity, InvoiceDto> {
         }
 
         return InvoiceEntity.builder()
-                .invoiceId(dto.getInvoiceId())
                 .subscriptionId(dto.getSubscriptionId())
                 .customerId(dto.getCustomerId())
                 .amount(dto.getAmount())
