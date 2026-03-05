@@ -44,6 +44,8 @@ services:
       - ./docker/prometheus:/etc/prometheus
     ports:
       - "9090:9090"
+    depends_on:
+      - otel-collector
 
   grafana:
     image: grafana/grafana:latest
@@ -93,8 +95,10 @@ services:
     ports:
       - "43180:4318"   
       - "43170:4317"   
+      - "8889:8889" 
     depends_on:
       - tempo
+      - loki
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
