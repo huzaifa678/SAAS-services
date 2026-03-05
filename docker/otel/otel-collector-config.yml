@@ -1,3 +1,5 @@
+file_format: 1.0.0
+
 receivers:
   otlp:
     protocols:
@@ -8,15 +10,32 @@ processors:
   batch:
 
 exporters:
-  otlp:
+
+  otlp/tempo:
     endpoint: tempo:4317
     tls:
       insecure: true
 
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+
 service:
   pipelines:
+
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlp/tempo]
 
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki]
