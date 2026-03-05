@@ -22,8 +22,8 @@ import { KafkaModule } from './kafka.module';
       synchronize: false, 
       logging: true,
       extra: {
-        max: 20,                 
-        min: 5,                  
+        max: parseInt(process.env.DB_POOL_MAX || '20'),
+        min: parseInt(process.env.DB_POOL_MIN || '5'),                
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,
       },
