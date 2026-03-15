@@ -20,6 +20,9 @@ exporters:
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
 
+  otlphttp/logstash:
+    endpoint: http://logstash:5000
+
 service:
   pipelines:
 
@@ -36,4 +39,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [loki]
+      exporters: [loki, otlphttp/logstash]

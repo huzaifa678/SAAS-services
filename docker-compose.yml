@@ -54,6 +54,8 @@ services:
       - prometheus
       - loki
       - tempo
+    profiles:
+      - grafana
     environment:
       - GF_LOG_LEVEL=info
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-simple-json-datasource
@@ -66,6 +68,8 @@ services:
   loki:
     image: grafana/loki:2.9.0
     container_name: loki
+    profiles:
+      - grafana
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
@@ -75,6 +79,8 @@ services:
   tempo:
     image: grafana/tempo:2.4.1
     container_name: tempo
+    profiles:
+      - grafana
     command: ["-config.file=/etc/tempo.yml"]
     volumes:
       - ./docker/tempo/tempo.yml:/etc/tempo.yml
@@ -84,6 +90,44 @@ services:
       - "4317:4317"   
       - "4318:4318"   
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    profiles:
+      - elk
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    container_name: logstash
+    profiles:
+      - elk
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5044:5044"
+      - "5001:5000"
+    volumes:
+      - ./docker/logstash/pipeline:/usr/share/logstash/pipeline
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana
+    profiles:
+      - elk
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.96.0
@@ -96,9 +140,6 @@ services:
       - "43180:4318"   
       - "43170:4317"   
       - "8889:8889" 
-    depends_on:
-      - tempo
-      - loki
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -247,6 +288,7 @@ volumes:
   grafana_data:
   kafka_data:
   tempo_data:
+  elasticsearch_data:
   otel_data:
   keycloak_postgres_data:
 
