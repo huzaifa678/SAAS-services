@@ -2,6 +2,23 @@ global:
   scrape_interval: 5s
 
 scrape_configs:
+
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+
   - job_name: 'auth-service'
     static_configs:
       - targets: ['host.docker.internal:8080']  # Auth service metrics endpoint
+
+  - job_name: 'subscription-service'
+    static_configs:
+      - targets: ['host.docker.internal:8081']  # Subscription service metrics endpoint
+
+  - job_name: 'billing-service'
+    static_configs:
+      - targets: ['host.docker.internal:8082']  # Billing service metrics endpoint
+
+  - job_name: 'usage-service'
+    static_configs:
+      - targets: ['host.docker.internal:8083']  # Usage service metrics endpoint
