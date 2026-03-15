@@ -14,6 +14,11 @@ exporters:
     tls:
       insecure: true
 
+  otlp/elastic:
+    endpoint: http://apm-server:8200
+    tls:
+      insecure: true
+
   prometheus:
     endpoint: "0.0.0.0:8889"
 
