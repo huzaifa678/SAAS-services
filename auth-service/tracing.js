@@ -1,14 +1,18 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import pkg from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 
 
-const { Resource } = pkg
 const traceExporter = new OTLPTraceExporter({
   url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:43180/v1/traces',
+});
+
+const logExporter = new OTLPLogExporter({
+  url: process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT || 'http://localhost:43180/v1/logs', 
 });
 
 const sdk = new NodeSDK({
@@ -16,6 +20,7 @@ const sdk = new NodeSDK({
     [ATTR_SERVICE_NAME]: 'auth-service',
   }),
   traceExporter,
+  logRecordProcessor: new SimpleLogRecordProcessor(logExporter),
   instrumentations: [getNodeAutoInstrumentations()],
 });
 

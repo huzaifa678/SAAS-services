@@ -97,10 +97,12 @@ services:
       - elk
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
+      - xpack.security.enabled=true
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
       - "9200:9200"
+    networks:
+      - usage-network
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
 
@@ -114,6 +116,8 @@ services:
     ports:
       - "5044:5044"
       - "5001:5000"
+    networks:
+      - usage-network
     volumes:
       - ./docker/logstash/pipeline:/usr/share/logstash/pipeline
 
@@ -125,7 +129,15 @@ services:
     depends_on:
       - elasticsearch
     environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=I*8EnpQgrZ3Qx1P7GzRi
+    healthcheck:
+      test: ["CMD", "curl", "--write-out", "'%{http_code}'", "--silent", "--output", "/dev/null", "http://localhost:8200/"]
+      retries: 10
+      interval: 10s
+    networks:
+      - usage-network
     ports:
       - "5601:5601"
 
@@ -138,9 +150,12 @@ services:
       - elasticsearch
     ports:
       - "8200:8200"
+    networks:
+      - usage-network
     environment:
       - output.elasticsearch.hosts=["http://elasticsearch:9200"]
       - apm-server.host=0.0.0.0:8200
+      - apm-server.data_streams.wait_for_integration=false
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.96.0
@@ -153,6 +168,8 @@ services:
       - "43180:4318"   
       - "43170:4317"   
       - "8889:8889" 
+    networks:
+      - usage-network
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
