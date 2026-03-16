@@ -152,10 +152,13 @@ services:
       - "8200:8200"
     networks:
       - usage-network
-    environment:
-      - output.elasticsearch.hosts=["http://elasticsearch:9200"]
-      - apm-server.host=0.0.0.0:8200
-      - apm-server.data_streams.wait_for_integration=false
+    command: >
+      apm-server -e
+        -E output.elasticsearch.hosts=["http://elasticsearch:9200"]
+        -E output.elasticsearch.username=elastic
+        -E output.elasticsearch.password=HD2QvEqZk1dKn-TL6web
+        -E apm-server.data_streams.wait_for_integration=false
+        -E apm-server.host=0.0.0.0:8200
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.96.0
