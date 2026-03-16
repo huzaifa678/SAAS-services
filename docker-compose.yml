@@ -46,6 +46,8 @@ services:
       - "9090:9090"
     depends_on:
       - otel-collector
+    networks:
+      - usage-network
 
   grafana:
     image: grafana/grafana:latest
@@ -64,6 +66,8 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - usage-network
 
   loki:
     image: grafana/loki:2.9.0
@@ -75,6 +79,8 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./docker/loki:/etc/loki
+    networks:
+      - usage-network
 
   tempo:
     image: grafana/tempo:2.4.1
@@ -89,6 +95,8 @@ services:
       - "3200:3200"   
       - "4317:4317"   
       - "4318:4318"   
+    networks:
+      - usage-network
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
