@@ -6,6 +6,9 @@ import { SubscriptionMapper } from '@mapper/subscription.mapper';
 import { SubscriptionRepository } from '@repository/subscription.repository';
 import { CircuitBreakerService } from '@service/circuit-breaker.service';
 import { SubscriptionEventsProducer } from '@events/subscription.event.producer';
+import { trace, context } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('subscription-service');
 
 @Injectable()
 export class SubscriptionService implements OnApplicationShutdown {
@@ -70,25 +73,33 @@ export class SubscriptionService implements OnApplicationShutdown {
   }
 
   async create(input: CreateSubscriptionInput): Promise<SubscriptionEntity> {
-   const result = await this.createBreaker.fire(input);
-    if (!result) throw new Error('Failed to create subscription (circuit breaker fallback)');
+
+    const span = tracer.startSpan('service.createSubscription', undefined, context.active());
 
     try {
-      await this.eventsProducer.publishEvent('subscription.created', {
-        subscriptionId: result.id,
-        userId: result.userId,
-        planId: result.planId,
-        status: result.status,
-        currentPeriodStart: result.currentPeriodStart.toISOString(),
-        currentPeriodEnd: result.currentPeriodEnd.toISOString(),
-        cancelAtPeriodEnd: result.cancelAtPeriodEnd,
-        createdAt: result.createdAt.toISOString(),
+      const result = await this.createBreaker.fire(input);
+      if (!result) throw new Error('Failed to create subscription (circuit breaker fallback)');
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        await this.eventsProducer.publishEvent('subscription.created', {
+          subscriptionId: result.id,
+          userId: result.userId,
+          planId: result.planId,
+          status: result.status,
+          currentPeriodStart: result.currentPeriodStart.toISOString(),
+          currentPeriodEnd: result.currentPeriodEnd.toISOString(),
+          cancelAtPeriodEnd: result.cancelAtPeriodEnd,
+          createdAt: result.createdAt.toISOString(),
+        });
       });
+
       this.logger.log(`Published subscription.created event for ${result.id}`);
+      return result;
     } catch (err) {
       this.logger.error('Failed to publish subscription.created event', err);
+      throw err;
+    } finally {
+      span.end()
     }
-    return result;
   }
 
   async update(id: string, input: UpdateSubscriptionInput): Promise<SubscriptionEntity> {

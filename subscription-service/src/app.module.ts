@@ -35,7 +35,7 @@ import { KafkaModule } from './kafka.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      path: '/api/subscription/',
+      path: '/api/subscription',
     }),
   ],
 })
