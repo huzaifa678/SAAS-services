@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class CreateSubscriptionsTable1773610508440 implements MigrationInterface {
-    name = 'CreateSubscriptionsTable1773610508440'
+export class CreateSubscriptionsTable1773832202785 implements MigrationInterface {
+    name = 'CreateSubscriptionsTable1773832202785'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TYPE "public"."subscriptions_status_enum" AS ENUM('ACTIVE', 'TRIALING', 'PAST_DUE', 'CANCELED', 'EXPIRED')`);
