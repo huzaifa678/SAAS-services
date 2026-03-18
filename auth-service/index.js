@@ -4,6 +4,7 @@ import express from 'express';
 import promClient from 'prom-client';
 import router from '../auth-service/src/controller/auth.controller.js';
 import http from 'http';
+import { trace, context, propagation } from '@opentelemetry/api';
 
 const app = express();
 const metricsApp = express();
@@ -11,6 +12,19 @@ const metricsApp = express();
 const METRICS_PORT = 4001;
 
 app.use(express.json());
+
+app.use('/api/auth', (req, res, next) => {
+  res.on('finish', () => {
+    const span = trace.getSpan(context.active());
+    if (span) {
+      console.log('Active trace ID:', span.spanContext().traceId);
+    } else {
+      console.log('No active span found');
+    }
+  });
+  next();
+});
+
 app.use('/api/auth', router);
 
 app.get('/metrics', async (req, res) => {
