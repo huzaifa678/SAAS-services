@@ -9,6 +9,8 @@ import (
 	"net/url"
 
 	kithttp "github.com/go-kit/kit/transport/http"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 
 	"github.com/huzaifa678/SAAS-services/circuit"
 	"github.com/huzaifa678/SAAS-services/utils"
@@ -48,10 +50,20 @@ func NewForwardService(
 
 		wrapped := circuit.WrapWithBreaker(
 			func(ctx context.Context) (interface{}, error) {
+				reqHeaders := make(http.Header)
+
+				for k, v := range headers {
+					for _, val := range v {
+						reqHeaders.Add(k, val)
+					}
+				}
+
+				otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(reqHeaders))
+
 				return client(ctx, struct {
 					Body   []byte
 					Header http.Header
-				}{body, headers})
+				}{body, reqHeaders})
 			},
 			serviceName,
 			cbCfg,
