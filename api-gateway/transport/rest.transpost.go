@@ -10,6 +10,8 @@ import (
 	kithttp "github.com/go-kit/kit/transport/http"
 	kitlog "github.com/go-kit/log"
 	"github.com/huzaifa678/SAAS-services/endpoint"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 func DecodeRESTRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -71,6 +73,11 @@ func NewRESTHTTPHandler(endpoint kitendpoint.Endpoint, logger kitlog.Logger) htt
 		DecodeRESTRequest,
 		EncodeRESTRequest,
 		kithttp.ServerBefore(func(ctx context.Context, r *http.Request) context.Context {
+
+			propagator := otel.GetTextMapPropagator()
+			
+			ctx = propagator.Extract(ctx, propagation.HeaderCarrier(r.Header))
+
 			level.Info(logger).Log(
 				"msg", "incoming request",
 				"method", r.Method,
