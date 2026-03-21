@@ -4,8 +4,19 @@ receivers:
       http:
       grpc:
 
+  filelog:
+    include:
+      - /var/lib/docker/containers/*/*.log
+    start_at: beginning
+
 processors:
   batch:
+
+  resource:
+    attributes:
+      - action: insert
+        key: loki.resource.labels
+        value: container_name,service.name
 
 exporters:
 
@@ -24,6 +35,8 @@ exporters:
 
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
 
   otlphttp/logstash:
     endpoint: http://logstash:5000
