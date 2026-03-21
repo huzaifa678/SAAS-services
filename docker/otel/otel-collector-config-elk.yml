@@ -50,6 +50,6 @@ service:
       exporters: [prometheus]
 
     logs:
-      receivers: [otlp, filelog]
+      receivers: [otlp]
       processors: [batch]
       exporters: [otlphttp/logstash]
