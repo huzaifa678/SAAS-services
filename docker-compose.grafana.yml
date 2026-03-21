@@ -1,0 +1,89 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    profiles:
+      - grafana
+    depends_on:
+      - otel-collector-grafana
+    networks:
+      - usage-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    environment:
+      - GF_LOG_LEVEL=info
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-simple-json-datasource
+    ports:
+      - "3001:3000"
+    profiles:
+      - grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - usage-network
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    profiles:
+      - grafana
+    volumes:
+      - ./docker/loki:/etc/loki
+    networks:
+      - usage-network
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    profiles:
+      - grafana
+    command: ["-config.file=/etc/tempo.yml"]
+    volumes:
+      - ./docker/tempo/tempo.yml:/etc/tempo.yml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"   
+      - "4317:4317"   
+      - "4318:4318"   
+    networks:
+      - usage-network
+
+  otel-collector-grafana:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector-grafana
+    command: ["--config=/etc/otel-collector-config-grafana.yml"]
+    volumes:
+      - ./docker/otel/otel-collector-config-grafana.yml:/etc/otel-collector-config-grafana.yml
+      - otel_data:/var/otel
+    profiles:
+      - grafana
+    ports:
+      - "43180:4318"
+      - "43170:4317"
+      - "8889:8889"
+    networks:
+      - usage-network
+
+networks:
+  usage-network:
+    external: true
+
+volumes:
+  grafana_data:
+  otel_data:
+  tempo_data:
+  

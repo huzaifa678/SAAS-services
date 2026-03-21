@@ -16,7 +16,10 @@ processors:
     attributes:
       - action: insert
         key: log.resource.labels
-        value: container_name,service.name
+        value: service.name, container_name
+      - action: insert
+        key: service.name
+        value: "unknown-service"
 
 exporters:
 
