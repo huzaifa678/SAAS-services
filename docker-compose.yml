@@ -168,18 +168,35 @@ services:
         -E apm-server.data_streams.wait_for_integration=false
         -E apm-server.host=0.0.0.0:8200
 
-  otel-collector:
+  otel-collector-grafana:
     image: otel/opentelemetry-collector-contrib:0.96.0
     container_name: otel-collector
-    command: ["--config=/etc/otel-collector-config.yml"]
+    profiles:
+      - grafana    
+    command: ["--config=/etc/otel-collector-config-grafana.yml"]
     volumes:
-      - ./docker/otel/otel-collector-config.yml:/etc/otel-collector-config.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./docker/otel/otel-collector-config-grafana.yml:/etc/otel-collector-config-grafana.yml
       - otel_data:/var/otel
     ports:
       - "43180:4318"   
       - "43170:4317"   
       - "8889:8889" 
+    networks:
+      - usage-network
+
+  otel-collector-elk:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector-elk
+    profiles:
+      - elk       
+    command: ["--config=/etc/otel-collector-config-elk.yml"]
+    volumes:
+      - ./docker/otel/otel-collector-config-elk.yml:/etc/otel-collector-config-elk.yml
+      - otel_data:/var/otel
+    ports:
+      - "43181:4318"   
+      - "43171:4317"   
+      - "8890:8889" 
     networks:
       - usage-network
 
