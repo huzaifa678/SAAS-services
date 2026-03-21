@@ -34,7 +34,6 @@ var interruptSignals = []os.Signal{
 // @description API Gateway for Auth, Subscription and Billing Services
 // @host localhost:9000
 // @BasePath /
-
 func main() {
 	cfg := utils.Load()
 
