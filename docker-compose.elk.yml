@@ -1,0 +1,104 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-elk
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - otel-collector-elk
+    profiles:
+      - elk
+    networks:
+      - usage-network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    profiles:
+      - elk
+    networks:
+      - usage-network
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    container_name: logstash
+    depends_on:
+      - elasticsearch
+    profiles:
+      - elk
+    ports:
+      - "5044:5044"
+      - "5001:5000"
+    networks:
+      - usage-network
+    volumes:
+      - ./docker/logstash/pipeline:/usr/share/logstash/pipeline
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    profiles:
+      - elk
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=I*8EnpQgrZ3Qx1P7GzRi
+    ports:
+      - "5601:5601"
+    networks:
+      - usage-network
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:8.13.4
+    container_name: apm-server
+    profiles:
+      - elk
+    depends_on:
+      - elasticsearch
+    ports:
+      - "8200:8200"
+    networks:
+      - usage-network
+    command: >
+      apm-server -e
+        -E output.elasticsearch.hosts=["http://elasticsearch:9200"]
+        -E output.elasticsearch.username=elastic
+        -E output.elasticsearch.password=HD2QvEqZk1dKn-TL6web
+        -E apm-server.data_streams.wait_for_integration=false
+        -E apm-server.host=0.0.0.0:8200
+
+  otel-collector-elk:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector-elk
+    command: ["--config=/etc/otel-collector-config-elk.yml"]
+    volumes:
+      - ./docker/otel/otel-collector-config-elk.yml:/etc/otel-collector-config-elk.yml
+      - otel_data:/var/otel
+    profiles:
+      - elk
+    ports:
+      - "43181:4318"
+      - "43171:4317"
+      - "8890:8889"
+    networks:
+      - usage-network
+
+networks:
+  usage-network:
+    external: true
+
+volumes:
+  elasticsearch_data:
+  otel_data:
