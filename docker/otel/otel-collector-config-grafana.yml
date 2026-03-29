@@ -6,16 +6,31 @@ receivers:
 
   filelog:
     include:
-      - /var/lib/docker/containers/*/*.log 
+      - /var/lib/docker/containers/*/*.log
     start_at: beginning
     operators:
       - type: json_parser
+        parse_from: body
         timestamp:
-          parse_from: attributes.time
+          parse_from: time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       - type: move
-        from: attributes.log
+        from: log
         to: body
+      - type: json_parser
+        parse_from: body
+        timestamp:
+          parse_from: ts
+          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      - type: move
+        from: message
+        to: body
+      - type: move
+        from: stream
+        to: attributes.container.stream
+      - type: move
+        from: container_id
+        to: attributes.container.id
 
 processors:
   batch:

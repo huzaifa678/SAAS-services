@@ -49,7 +49,6 @@ func main() {
 		logger,
 		"ts", kitlog.DefaultTimestampUTC,
 		"caller", kitlog.DefaultCaller,
-		"service.name", cfg.App.Name,
 	)
 
 	shutdownTracer := tracing.InitTracer(cfg.App.Name)

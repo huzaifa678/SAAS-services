@@ -10,14 +10,9 @@
         </encoder>
     </appender>
 
-    <!-- OpenTelemetry Appender -->
-    <appender name="OTEL"
-        class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender" />
-
     <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="OTEL"/>
     </root>
 
 </configuration>

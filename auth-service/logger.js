@@ -11,10 +11,8 @@ const addTraceContext = winston.format((info) => {
     info.trace_id = ctx.traceId;
     info.span_id = ctx.spanId;
   }
-  
-  info['service.name'] = SERVICE_NAME; 
+
   info.severity = info.level;
-  info['service.name'] = SERVICE_NAME;
   info['service.version'] = process.env.SERVICE_VERSION || '1.0.0';
   info['deployment.environment'] = process.env.NODE_ENV;
   return info;

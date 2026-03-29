@@ -1,4 +1,4 @@
-import winston from 'winston';
+import * as winston from 'winston';
 import { trace, context } from '@opentelemetry/api';
 import { AnyValueMap, logs, SeverityNumber } from '@opentelemetry/api-logs';
 import { TransformableInfo } from 'logform';
@@ -20,7 +20,6 @@ function emitOtelLog(
   const span = trace.getSpan(context.active());
   const attrs: Record<string, unknown> = {
     ...(meta ?? {}),
-    'service.name': SERVICE_NAME,
     severity: level,
   };
   if (span) {
