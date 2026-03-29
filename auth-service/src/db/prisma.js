@@ -26,14 +26,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const shutdown = async (signal) => {
-  console.log(`\nReceived ${signal}. Closing Prisma connections...`);
 
   try {
     await prisma.$disconnect();
-    console.log('Prisma disconnected cleanly');
     process.exit(0);
   } catch (err) {
-    console.error('Error during Prisma shutdown:', err);
     process.exit(1);
   }
 };

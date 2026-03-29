@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-kit/kit/log/level"
 	kitlog "github.com/go-kit/log"
+	_ "github.com/huzaifa678/SAAS-services/docs"
 	"github.com/huzaifa678/SAAS-services/endpoint"
 	"github.com/huzaifa678/SAAS-services/interceptor"
 	"github.com/huzaifa678/SAAS-services/service"
@@ -17,9 +18,9 @@ import (
 	"github.com/huzaifa678/SAAS-services/transport"
 	"github.com/huzaifa678/SAAS-services/utils"
 	"github.com/redis/go-redis/v9"
-	"golang.org/x/sync/errgroup"
 	httpSwagger "github.com/swaggo/http-swagger"
-	_ "github.com/huzaifa678/SAAS-services/docs"
+	"go.opentelemetry.io/otel"
+	"golang.org/x/sync/errgroup"
 )
 
 var interruptSignals = []os.Signal{
@@ -37,14 +38,18 @@ var interruptSignals = []os.Signal{
 func main() {
 	cfg := utils.Load()
 
-	var logger kitlog.Logger
-	logger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
+	tr := otel.Tracer("debug")
+	_, span := tr.Start(context.Background(), "startup-test")
+	span.End()
+
+	
+	logger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
 	logger = level.NewFilter(logger, level.AllowAll())
 	logger = kitlog.With(
 		logger,
 		"ts", kitlog.DefaultTimestampUTC,
 		"caller", kitlog.DefaultCaller,
-		"service", cfg.App.Name,
+		"service.name", cfg.App.Name,
 	)
 
 	shutdownTracer := tracing.InitTracer(cfg.App.Name)
@@ -75,6 +80,7 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 		"subscription-service",
 		"Subscription service temporarily unavailable",
 		cfg.CircuitBreaker,
+		logger,
 	)
 
 	authSvc := service.NewForwardService(
@@ -82,6 +88,7 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 		"auth-service",
 		"Auth service temporarily unavailable",
 		cfg.CircuitBreaker,
+		logger,
 	)
 
 	billSvc := service.NewForwardService(
@@ -89,6 +96,7 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 		"billing-service",
 		"Billing service temporarily unavailable",
 		cfg.CircuitBreaker,
+		logger,
 	)
 
 	authEndpoint := endpoint.MakeAuthEndpoint(authSvc)

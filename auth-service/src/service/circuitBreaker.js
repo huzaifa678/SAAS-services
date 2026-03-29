@@ -1,4 +1,5 @@
 import CircuitBreaker from 'opossum';
+import logger from '../../logger.js' 
 
 export function createBreaker(fn, options = {}) {
   const defaultOptions = {
@@ -14,9 +15,8 @@ export function createBreaker(fn, options = {}) {
     breaker.fallback(fallback);
   }
 
-  breaker.on('open', () => console.warn('Circuit breaker opened!'));
-  breaker.on('halfOpen', () => console.log('Circuit breaker half-open, testing service...'));
-  breaker.on('close', () => console.log('Circuit breaker closed, service healthy again.'));
-
+  breaker.on('open', () => logger.info('breaker open')) 
+  breaker.on('halfOpen', () => logger.info('breaker halfopen')) 
+  breaker.on('closed', () => logger.info('breaker closed')) 
   return breaker;
 }

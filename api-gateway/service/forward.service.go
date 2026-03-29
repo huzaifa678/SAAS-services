@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 
+	"github.com/go-kit/kit/log/level"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 
+	kitlog "github.com/go-kit/log"
 	"github.com/huzaifa678/SAAS-services/circuit"
 	"github.com/huzaifa678/SAAS-services/utils"
 )
@@ -29,13 +30,17 @@ func NewForwardService(
 	serviceName string,
 	fallbackMsg string,
 	cbCfg utils.CircuitBreakerConfig,
+	logger kitlog.Logger,
 ) ForwardService {
 	s := &forwardService{}
 
 	s.forward = func(ctx context.Context, body []byte, headers http.Header, path, method string) ([]byte, int, error) {
 		fullURL := baseURL + path
-		log.Println("full url", fullURL)
-		log.Println("method", method)
+		level.Info(logger).Log(
+			"msg", "forwarding request",
+			"url", fullURL,
+			"method", method,
+		)
 		u, err := url.Parse(fullURL)
 		if err != nil {
 			return nil, 0, err

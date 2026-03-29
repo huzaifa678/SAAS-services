@@ -16,17 +16,12 @@ processors:
     attributes:
       - action: insert
         key: log.resource.labels
-        value: service.name, container_name
+        value: service.name
       - action: insert
         key: service.name
         value: "unknown-service"
 
 exporters:
-
-  otlp/tempo:
-    endpoint: tempo:4317
-    tls:
-      insecure: true
 
   otlp/elastic:
     endpoint: http://apm-server:8200
@@ -45,7 +40,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/tempo, otlp/elastic]
+      exporters: [otlp/elastic]
 
     metrics:
       receivers: [otlp]

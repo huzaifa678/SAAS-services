@@ -5,9 +5,11 @@ import (
 	"io"
 	"net/http"
 
-	kithttp "github.com/go-kit/kit/transport/http"
 	kitendpoint "github.com/go-kit/kit/endpoint"
+	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/huzaifa678/SAAS-services/endpoint"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 func DecodeGraphQLRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -26,7 +28,6 @@ func DecodeGraphQLRequest(_ context.Context, r *http.Request) (interface{}, erro
 		Header: headers,
 		Path: r.URL.Path,
 		Method: r.Method,
-		Context: r.Context(),
 	}, nil
 }
 
@@ -70,5 +71,8 @@ func NewGraphQLHTTPHandler(endpoint kitendpoint.Endpoint) http.Handler {
 		endpoint,
 		DecodeGraphQLRequest,
 		EncodeGraphQLResponse,
+		kithttp.ServerBefore(func(ctx context.Context, r *http.Request) context.Context {
+			return otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(r.Header))
+		}),
 	)
 }

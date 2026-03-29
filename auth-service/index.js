@@ -4,7 +4,7 @@ import express from 'express';
 import promClient from 'prom-client';
 import router from '../auth-service/src/controller/auth.controller.js';
 import http from 'http';
-import { trace, context, propagation } from '@opentelemetry/api';
+import logger from './logger.js';
 
 const app = express();
 const metricsApp = express();
@@ -15,12 +15,11 @@ app.use(express.json());
 
 app.use('/api/auth', (req, res, next) => {
   res.on('finish', () => {
-    const span = trace.getSpan(context.active());
-    if (span) {
-      console.log('Active trace ID:', span.spanContext().traceId);
-    } else {
-      console.log('No active span found');
-    }
+    logger.info('request completed', {
+      method: req.method,
+      path: req.originalUrl,
+      status: res.statusCode,
+    });
   });
   next();
 });
@@ -36,33 +35,33 @@ const server = http.createServer(app);
 const metricsServer = http.createServer(metricsApp);
 
 metricsServer.listen(METRICS_PORT, () => {
-  console.log(`Prometheus metrics available at http://localhost:${METRICS_PORT}/metrics`);
+  logger.info(`Prometheus metrics at http://localhost:${METRICS_PORT}/metrics`);
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });
 
 const shutdownSignals = ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGQUIT'];
 
-shutdownSignals.forEach(sig => {
+shutdownSignals.forEach((sig) => {
   process.on(sig, () => {
-    console.log(`Received ${sig}, shutting down gracefully...`);
+    logger.warn(`Received ${sig}, shutting down gracefully...`);
 
-    server.close(err => {
+    server.close((err) => {
       if (err) {
-        console.error('Error during server shutdown', err);
+        logger.error('Error during shutdown', { error: err.message });
         process.exit(1);
       }
 
-      console.log('Server closed gracefully');
+      logger.info('Server closed gracefully');
       process.exit(0);
-    })
+    });
 
     setTimeout(() => {
-      console.warn('Forcing shutdown...');
+      logger.warn('Forcing shutdown...');
       process.exit(1);
     }, 5000);
-  })
-})
+  });
+});
