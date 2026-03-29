@@ -82,10 +82,12 @@ services:
   otel-collector-elk:
     image: otel/opentelemetry-collector-contrib:0.96.0
     container_name: otel-collector-elk
+    user: "0:0"
     command: ["--config=/etc/otel-collector-config-elk.yml"]
     volumes:
       - ./docker/otel/otel-collector-config-elk.yml:/etc/otel-collector-config-elk.yml
       - otel_data:/var/otel
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro 
     profiles:
       - elk
     ports:

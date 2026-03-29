@@ -14,14 +14,11 @@ import { SubscriptionRepository } from '@repository/subscription.repository';
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       entities: [SubscriptionEntity],
-      synchronize: true, 
+      synchronize: true,
     }),
     TypeOrmModule.forFeature([SubscriptionEntity]),
   ],
-  providers: [
-    SubscriptionService,
-    SubscriptionRepository,
-  ],
+  providers: [SubscriptionService, SubscriptionRepository],
   exports: [SubscriptionService],
 })
 export class SubscriptionTestModule {}

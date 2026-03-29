@@ -18,11 +18,7 @@ export class SubscriptionController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() body: UpdateSubscriptionInput,
-  ) {
+  update(@Param('id') id: string, @Body() body: UpdateSubscriptionInput) {
     return this.service.update(id, body);
   }
 }
-
