@@ -7,20 +7,19 @@ import { SubscriptionEntity } from '@model/entities/subscription.entity';
 import { SubscriptionRepository } from './repository/subscription.repository';
 import { SubscriptionEventsProducer } from './events/subscription.event.producer';
 import { SubscriptionGrpcController } from './controller/subscription.controller.grpc';
+import { WinstonLogger } from '@logger/winston.logger';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([SubscriptionEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([SubscriptionEntity])],
   controllers: [SubscriptionGrpcController],
   providers: [
     SubscriptionService,
     SubscriptionResolver,
     CircuitBreakerService,
     SubscriptionRepository,
-    SubscriptionEventsProducer 
+    SubscriptionEventsProducer,
+    WinstonLogger,
   ],
   exports: [SubscriptionService],
 })
 export class SubscriptionModule {}
-

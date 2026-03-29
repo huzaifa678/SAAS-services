@@ -5,7 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ObjectType, Field, ID, registerEnumType, GraphQLISODateTime } from '@nestjs/graphql';
+import {
+  ObjectType,
+  Field,
+  ID,
+  registerEnumType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { SubscriptionStatus } from '../domain/subscription-status.enum';
 
 registerEnumType(SubscriptionStatus, { name: 'SubscriptionStatus' });
@@ -26,7 +32,11 @@ export class SubscriptionEntity {
   planId!: string;
 
   @Field(() => SubscriptionStatus)
-  @Column({ type: 'enum', enum: SubscriptionStatus, default: SubscriptionStatus.ACTIVE })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.ACTIVE,
+  })
   status!: SubscriptionStatus;
 
   @Field(() => GraphQLISODateTime)

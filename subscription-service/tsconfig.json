@@ -23,7 +23,9 @@
       "@pb/*": ["src/pb/*"],
       "@repository/*": ["src/repository/*"],
       "@events/*": ["src/events/*"],
-      "@test/*": ["test/*"]
+      "@test/*": ["test/*"],
+      "@lib/*": ["src/lib/*"],
+      "@logger/*": ["src/logger/*"]
     },
     "strict": true,
     "incremental": true,

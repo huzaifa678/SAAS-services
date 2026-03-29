@@ -29,25 +29,25 @@ describe('SubscriptionService (Integration)', () => {
     container = pg.container;
 
     const module: TestingModule = await Test.createTestingModule({
-        imports: [
+      imports: [
         TypeOrmModule.forRoot({
-            type: 'postgres',
-            host: pg.host,
-            port: pg.port,
-            username: pg.username,
-            password: pg.password,
-            database: pg.database,
-            entities: [SubscriptionEntity],
-            synchronize: true,
+          type: 'postgres',
+          host: pg.host,
+          port: pg.port,
+          username: pg.username,
+          password: pg.password,
+          database: pg.database,
+          entities: [SubscriptionEntity],
+          synchronize: true,
         }),
         TypeOrmModule.forFeature([SubscriptionEntity]),
-        ],
-        providers: [
+      ],
+      providers: [
         SubscriptionService,
         SubscriptionRepository,
         { provide: CircuitBreakerService, useValue: mockBreakerService },
         { provide: SubscriptionEventsProducer, useValue: mockEventsProducer },
-        ],
+      ],
     }).compile();
 
     service = module.get(SubscriptionService);
@@ -59,19 +59,19 @@ describe('SubscriptionService (Integration)', () => {
 
   it('should create subscription and publish event', async () => {
     const input = {
-        userId: uuidv4(),
-        planId: uuidv4(),
+      userId: uuidv4(),
+      planId: uuidv4(),
     };
 
     const result = await service.create(input as any);
 
     expect(result.id).toBeDefined();
     expect(mockEventsProducer.publishEvent).toHaveBeenCalledWith(
-        'subscription.created',
-        expect.objectContaining({
+      'subscription.created',
+      expect.objectContaining({
         userId: input.userId,
         planId: input.planId,
-        }),
+      }),
     );
   });
 });

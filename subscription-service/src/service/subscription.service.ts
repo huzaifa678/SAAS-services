@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnApplicationShutdown, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnApplicationShutdown,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { CreateSubscriptionInput } from '@model/dtos/create-subscription.dto';
 import { UpdateSubscriptionInput } from '@model/dtos/update-subscription.dto';
 import { SubscriptionEntity } from '@model/entities/subscription.entity';
@@ -44,9 +49,7 @@ export class SubscriptionService implements OnApplicationShutdown {
 
     this.createBreaker = this.breakerService.create(
       (input: CreateSubscriptionInput) =>
-        this.repository.createAndSave(
-          SubscriptionMapper.toRequest(input),
-        ),
+        this.repository.createAndSave(SubscriptionMapper.toRequest(input)),
       undefined,
       () => {
         throw new ServiceUnavailableException(
@@ -58,7 +61,8 @@ export class SubscriptionService implements OnApplicationShutdown {
 
   async findById(id: string): Promise<SubscriptionEntity> {
     const result = await this.findByIdBreaker.fire(id);
-    if (!result) throw new Error('Subscription not found (circuit breaker fallback)');
+    if (!result)
+      throw new Error('Subscription not found (circuit breaker fallback)');
     return result;
   }
 
@@ -66,19 +70,27 @@ export class SubscriptionService implements OnApplicationShutdown {
     const result = await this.findByUserIdBreaker.fire(userId);
 
     if (!result || result.length === 0) {
-      throw new Error('No active subscriptions found (circuit breaker fallback)');
+      throw new Error(
+        'No active subscriptions found (circuit breaker fallback)',
+      );
     }
 
     return result;
   }
 
   async create(input: CreateSubscriptionInput): Promise<SubscriptionEntity> {
-
-    const span = tracer.startSpan('service.createSubscription', undefined, context.active());
+    const span = tracer.startSpan(
+      'service.createSubscription',
+      undefined,
+      context.active(),
+    );
 
     try {
       const result = await this.createBreaker.fire(input);
-      if (!result) throw new Error('Failed to create subscription (circuit breaker fallback)');
+      if (!result)
+        throw new Error(
+          'Failed to create subscription (circuit breaker fallback)',
+        );
       await context.with(trace.setSpan(context.active(), span), async () => {
         await this.eventsProducer.publishEvent('subscription.created', {
           subscriptionId: result.id,
@@ -98,11 +110,14 @@ export class SubscriptionService implements OnApplicationShutdown {
       this.logger.error('Failed to publish subscription.created event', err);
       throw err;
     } finally {
-      span.end()
+      span.end();
     }
   }
 
-  async update(id: string, input: UpdateSubscriptionInput): Promise<SubscriptionEntity> {
+  async update(
+    id: string,
+    input: UpdateSubscriptionInput,
+  ): Promise<SubscriptionEntity> {
     const updated = await this.repository.update(id, input);
 
     try {
@@ -117,8 +132,7 @@ export class SubscriptionService implements OnApplicationShutdown {
         updatedAt: updated.updatedAt.toISOString(),
       });
       this.logger.log(`Published subscription.created event for ${updated.id}`);
-    }
-    catch (err) {
+    } catch (err) {
       this.logger.error('Failed to publish subscription.updated event', err);
     }
     return updated;

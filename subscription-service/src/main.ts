@@ -3,11 +3,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
-
+import { WinstonLogger } from '@logger/winston.logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const logger = new Logger('Bootstrap');
+
+  const logger = app.get(WinstonLogger);
+  app.useLogger(logger);
 
   app.enableShutdownHooks();
   app.connectMicroservice({
@@ -28,13 +30,13 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  
-  const port = process.env.PORT || 8081
+
+  const port = process.env.PORT || 8081;
   await app.listen(port);
 
   logger.log(`Subscription service running on port ${port}`);
 
-  process.on('SIGINT', () => logger.log('SIGINT received'));
-  process.on('SIGTERM', () => logger.log('SIGTERM received'));
+  process.on('SIGINT', () => void logger.log('SIGINT received'));
+  process.on('SIGTERM', () => void logger.log('SIGTERM received'));
 }
 bootstrap();

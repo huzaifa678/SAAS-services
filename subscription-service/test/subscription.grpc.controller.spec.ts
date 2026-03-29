@@ -13,9 +13,7 @@ describe('SubscriptionGrpcController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SubscriptionGrpcController],
-      providers: [
-        { provide: SubscriptionService, useValue: mockService },
-      ],
+      providers: [{ provide: SubscriptionService, useValue: mockService }],
     }).compile();
 
     controller = module.get(SubscriptionGrpcController);

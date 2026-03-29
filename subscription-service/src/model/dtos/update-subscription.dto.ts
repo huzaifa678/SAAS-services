@@ -14,4 +14,3 @@ export class UpdateSubscriptionInput {
   @IsBoolean()
   cancelAtPeriodEnd?: boolean;
 }
-
