@@ -56,6 +56,9 @@ importers:
       '@opentelemetry/semantic-conventions':
         specifier: ^1.39.0
         version: 1.39.0
+      '@opentelemetry/winston-transport':
+        specifier: ^0.24.0
+        version: 0.24.0
       '@prisma/adapter-pg':
         specifier: ^7.3.0
         version: 7.3.0
@@ -1007,6 +1010,10 @@ packages:
     resolution: {integrity: sha512-zRM5/Qj6G84Ej3F1yt33xBVY/3tnMxtL1fiDIxYbDWYaZ/eudVw3/PBiZ8G7JwUxXxjW8gU4g6LnOyfGKYHYgw==}
     engines: {node: '>=8.0.0'}
 
+  '@opentelemetry/api-logs@0.214.0':
+    resolution: {integrity: sha512-40lSJeqYO8Uz2Yj7u94/SJWE/wONa7rmMKjI1ZcIjgf3MHNHv1OZUCrCETGuaRF62d5pQD1wKIW+L4lmSMTzZA==}
+    engines: {node: '>=8.0.0'}
+
   '@opentelemetry/api-metrics@0.26.0':
     resolution: {integrity: sha512-idDSUTx+LRwJiHhVHhdh45SWow5u9lKNDROKu5AMzsIVPI29utH5FfT9vor8qMM6blxWWvlT22HUNdNMWqUQfQ==}
     engines: {node: '>=8.0.0'}
@@ -1566,6 +1573,10 @@ packages:
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
+
+  '@opentelemetry/winston-transport@0.24.0':
+    resolution: {integrity: sha512-xlvEAqJRP8RlghjvAEVCEf1tGJsoJfgp4YBBJVSTXEb5hK+Nk94rJaDzBZg5JxWjyRDhWxJ41jCS+lfa3RBKZQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
 
   '@paralleldrive/cuid2@2.3.1':
     resolution: {integrity: sha512-XO7cAxhnTZl0Yggq6jOgjiOHhbgcO4NqFqwSmQpjK3b6TEE6Uj/jfSk6wzYyemh3+I0sHirKSetjQwn5cZktFw==}
@@ -4911,6 +4922,10 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
 
+  '@opentelemetry/api-logs@0.214.0':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+
   '@opentelemetry/api-metrics@0.26.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -5708,6 +5723,11 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
+
+  '@opentelemetry/winston-transport@0.24.0':
+    dependencies:
+      '@opentelemetry/api-logs': 0.214.0
+      winston-transport: 4.9.0
 
   '@paralleldrive/cuid2@2.3.1':
     dependencies:

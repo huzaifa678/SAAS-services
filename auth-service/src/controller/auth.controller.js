@@ -21,7 +21,11 @@ router.use((req, res, next) => {
       const payload = jwt.verify(token, process.env.JWT_SECRET);
       req.userId = payload.userId;
     } catch (e) {
-      logger.warn('Invalid token', { error: e.message });
+      logger.warn('Invalid token', { 
+        error: e.message,
+        path: req.path,
+        service: 'auth-service' 
+      });
     }
   }
   next();
@@ -56,8 +60,10 @@ router.post('/', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    logger.error('GraphQL execution failed', {
+    logger.warn('GraphQL execution failed', { 
       error: err.message,
+      path: req.path,
+      service: 'auth-service' 
     });
 
     res.status(500).json({ error: 'Internal server error' });
