@@ -28,19 +28,18 @@ const sdk = new NodeSDK({
   instrumentations: [getNodeAutoInstrumentations(), new GrpcInstrumentation()],
 });
 
+const logExporter = new OTLPLogExporter({
+  url: otlpLogUrl,
+});
+
 const logProvider = new LoggerProvider({
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: serviceName,
   }),
+  processors: [
+    new SimpleLogRecordProcessor(logExporter),
+  ],
 });
-
-(logProvider as any).addLogRecordProcessor(
-  new SimpleLogRecordProcessor(
-    new OTLPLogExporter({
-      url: otlpLogUrl,
-    }),
-  ),
-);
 
 logs.setGlobalLoggerProvider(logProvider);
 

@@ -13,6 +13,7 @@ import (
 	_ "github.com/huzaifa678/SAAS-services/docs"
 	"github.com/huzaifa678/SAAS-services/endpoint"
 	"github.com/huzaifa678/SAAS-services/interceptor"
+	"github.com/huzaifa678/SAAS-services/logging"
 	"github.com/huzaifa678/SAAS-services/service"
 	"github.com/huzaifa678/SAAS-services/tracing"
 	"github.com/huzaifa678/SAAS-services/transport"
@@ -42,15 +43,10 @@ func main() {
 	_, span := tr.Start(context.Background(), "startup-test")
 	span.End()
 
+	shutdownLogger := logging.InitLogger()
+	defer shutdownLogger(context.Background())	
 	
-	logger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
-	logger = level.NewFilter(logger, level.AllowAll())
-	logger = kitlog.With(
-		logger,
-		"ts", kitlog.DefaultTimestampUTC,
-		"caller", kitlog.DefaultCaller,
-		"service.name", cfg.App.Name,
-	)
+	logger := logging.NewOTelKitLogger(cfg.App.Name) 
 
 	shutdownTracer := tracing.InitTracer(cfg.App.Name)
 	defer shutdownTracer(context.Background())

@@ -1,37 +1,38 @@
 receivers:
   otlp:
     protocols:
-      http:
       grpc:
-
-  filelog:
-    include:
-      - /var/lib/docker/containers/*/*.log 
-    start_at: beginning
-    operators:
-      - type: json_parser
-        timestamp:
-          parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-      - type: move
-        from: attributes.log
-        to: body
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
 
 processors:
-  batch:
+  batch: {}
 
+  # 🔥 THIS FIXES "service.name missing in Loki"
+  resource:
+    attributes:
+      - key: service.name
+        from_attribute: service.name
+        action: insert
+      - key: service.namespace
+        value: nestjs
+        action: insert
+      - key: service.instance.id
+        value: nestjs-instance
+        action: insert
 
 exporters:
   otlp/tempo:
-    endpoint: "tempo:4317"
+    endpoint: tempo:4317
     tls:
       insecure: true
 
   prometheus:
-    endpoint: "0.0.0.0:8889"
+    endpoint: localhost:8889   # ✅ removes 0.0.0.0 warning
 
   otlphttp/loki:
-    endpoint: "http://loki:3100/otlp"
+    endpoint: http://loki:3100/otlp
     tls:
       insecure: true
 
@@ -39,13 +40,15 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [resource, batch]
       exporters: [otlp/tempo]
+
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [resource, batch]
       exporters: [prometheus]
+
     logs:
-      receivers: [otlp, filelog]
-      processors: [batch]
+      receivers: [otlp]
+      processors: [resource, batch]
       exporters: [otlphttp/loki]

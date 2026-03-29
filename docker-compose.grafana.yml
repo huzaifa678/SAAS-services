@@ -65,12 +65,9 @@ services:
   otel-collector-grafana:
     image: otel/opentelemetry-collector-contrib:0.96.0
     container_name: otel-collector-grafana
-    user: "0:0"
     command: ["--config=/etc/otel-collector-config-grafana.yml"]
     volumes:
       - ./docker/otel/otel-collector-config-grafana.yml:/etc/otel-collector-config-grafana.yml
-      - otel_data:/var/otel
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro 
     profiles:
       - grafana
     ports:
@@ -86,6 +83,5 @@ networks:
 
 volumes:
   grafana_data:
-  otel_data:
   tempo_data:
   
