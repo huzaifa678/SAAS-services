@@ -11,6 +11,9 @@ services:
   billing:
     url:  http://localhost:8082
 
+keycloak:
+  jwksURL: http://localhost:8180/realms/saas/protocol/openid-connect/certs
+
 redis:
   url: localhost:6379
 
