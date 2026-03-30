@@ -2,21 +2,44 @@ package logging
 
 import (
 	"context"
+	"fmt"
 
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
 	"go.opentelemetry.io/otel/log/global"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
-	stdoutlog "go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
+func InitLogger(ctx context.Context, serviceName string) func(context.Context) error {
+	lokiExporter, err := otlploghttp.New(ctx, 
+		otlploghttp.WithEndpoint("localhost:43180"), 
+		otlploghttp.WithInsecure(),
+	)
 
-func InitLogger() func(context.Context) error {
-	exporter, _ := stdoutlog.New(stdoutlog.WithPrettyPrint())
+	if err != nil {
+        return func(context.Context) error {
+            return fmt.Errorf("failed to create OTLP log exporter: %w", err)
+        }
+    }
+
+	consoleExporter, _ := stdoutlog.New(stdoutlog.WithPrettyPrint())
+
+	res, _ := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String(serviceName),
+		),
+	)
 
 	provider := sdklog.NewLoggerProvider(
-		sdklog.WithProcessor(sdklog.NewBatchProcessor(exporter)),
+		sdklog.WithProcessor(sdklog.NewBatchProcessor(lokiExporter)), 
+		sdklog.WithProcessor(sdklog.NewSimpleProcessor(consoleExporter)), 
+		sdklog.WithResource(res),
 	)
 
 	global.SetLoggerProvider(provider)
-
 	return provider.Shutdown
 }
