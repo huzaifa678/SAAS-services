@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
-	"github.com/redis/go-redis/v9"
 	kitlog "github.com/go-kit/log"
+	"github.com/huzaifa678/SAAS-services/throttling"
+	"github.com/redis/go-redis/v9"
 )
 
 type RedisRateLimiter struct {
@@ -17,6 +18,7 @@ type RedisRateLimiter struct {
 	burst       int           
 	keyPrefix   string
 	logger      kitlog.Logger
+	maxMemoryUsage float64
 }
 
 func RateLimitMiddleware(redisClient *redis.Client, rps int, burst int, keyPrefix string, logger kitlog.Logger) endpoint.Middleware {
@@ -26,6 +28,7 @@ func RateLimitMiddleware(redisClient *redis.Client, rps int, burst int, keyPrefi
 		burst:       burst,
 		keyPrefix:   keyPrefix,
 		logger:      logger,
+		maxMemoryUsage: 0.8, // 80% memory usage threshold
 	}
 
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
@@ -33,6 +36,23 @@ func RateLimitMiddleware(redisClient *redis.Client, rps int, burst int, keyPrefi
 			userID, _ := ctx.Value("userId").(string)
 			if userID == "" {
 				userID = "anonymous"
+			}
+
+			pressure, err := throttling.IsStorageUnderPressure(ctx, limiter.redisClient, limiter.maxMemoryUsage)
+			if err != nil {
+				_ = limiter.logger.Log(
+					"msg", "storage check failed",
+					"err", err,
+				)
+			}
+
+			if pressure {
+				_ = limiter.logger.Log(
+					"msg", "storage under pressure - throttling",
+					"userID", userID,
+				)
+
+				return nil, errors.New("service busy (storage pressure)")
 			}
 
 			key := fmt.Sprintf("%s:%s", limiter.keyPrefix, userID)
