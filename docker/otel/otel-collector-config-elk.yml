@@ -2,7 +2,9 @@ receivers:
   otlp:
     protocols:
       http:
+        endpoint: 0.0.0.0:4317
       grpc:
+        endpoint: 0.0.0.0:4318
 
   filelog:
     include:
@@ -14,12 +16,9 @@ processors:
 
   resource:
     attributes:
-      - action: insert
-        key: log.resource.labels
-        value: service.name
-      - action: insert
-        key: service.name
-        value: "unknown-service"
+      - key: service.name
+        from_attribute: service.name
+        action: insert
 
 exporters:
 
