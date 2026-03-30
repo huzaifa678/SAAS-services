@@ -66,10 +66,10 @@ func main() {
 func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Config, logger kitlog.Logger) {
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: cfg.Redis.URL,
+		Addr: cfg.Redis.URL, 
 	})
 
-	keycloakJWKSURL := cfg.Keycloak.JWKSURL 
+	jwtSecret := cfg.Jwt.Secret
 
 	subSvc := service.NewForwardService(
 		cfg.Services.Subscription.URL,
@@ -107,14 +107,8 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	subEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "sub", logger)(subEndpoint)
 	billEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "bill", logger)(billEndpoint)
 
-	jwtMiddleware, err := interceptor.KeycloakMiddleware(keycloakJWKSURL)
-	if err != nil {
-		level.Error(logger).Log("msg", "failed to initialize Keycloak middleware", "err", err)
-		return
-	}
-
-	subEndpoint = jwtMiddleware(subEndpoint)
-	billEndpoint = jwtMiddleware(billEndpoint)
+	subEndpoint = interceptor.JWTMiddleware(jwtSecret)(subEndpoint)
+	billEndpoint = interceptor.JWTMiddleware(jwtSecret)(billEndpoint)
 
 	authEndpoint = endpoint.TracedEndpoint("AuthEndpoint", authEndpoint)
 	subEndpoint = endpoint.TracedEndpoint("SubscriptionEndpoint", subEndpoint)
@@ -131,6 +125,7 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	mux.Handle("/swagger/", httpSwagger.Handler(
 		httpSwagger.URL("http://localhost:9000/swagger/doc.json"),
 	))
+
 
 	corsHandler := transport.CORSMiddleware(cfg.CORS.AllowedOrigins)(mux)
 
