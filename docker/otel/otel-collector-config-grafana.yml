@@ -15,12 +15,6 @@ processors:
       - key: service.name
         from_attribute: service.name
         action: insert
-      - key: service.namespace
-        value: nestjs
-        action: insert
-      - key: service.instance.id
-        value: nestjs-instance
-        action: insert
 
 exporters:
   otlp/tempo:
