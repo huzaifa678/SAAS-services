@@ -118,7 +118,7 @@ services:
 
   chroma:
     image: ghcr.io/chroma-core/chroma:latest
-    container_name: chroma
+    container_name: chroma-saas
     ports:
       - "8000:8000"
     volumes:
