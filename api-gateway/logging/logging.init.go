@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
-	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
 	"go.opentelemetry.io/otel/log/global"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -24,7 +23,6 @@ func InitLogger(ctx context.Context, serviceName string) func(context.Context) e
         }
     }
 
-	consoleExporter, _ := stdoutlog.New(stdoutlog.WithPrettyPrint())
 
 	res, _ := resource.Merge(
 		resource.Default(),
@@ -36,7 +34,6 @@ func InitLogger(ctx context.Context, serviceName string) func(context.Context) e
 
 	provider := sdklog.NewLoggerProvider(
 		sdklog.WithProcessor(sdklog.NewBatchProcessor(lokiExporter)), 
-		sdklog.WithProcessor(sdklog.NewSimpleProcessor(consoleExporter)), 
 		sdklog.WithResource(res),
 	)
 

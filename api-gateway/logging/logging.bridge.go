@@ -3,24 +3,40 @@ package logging
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
+	kitlog "github.com/go-kit/log"
 	"go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/log/global"
 )
 
 type OTelKitLogger struct {
 	logger log.Logger
+	kitLogger kitlog.Logger
 }
 
 func NewOTelKitLogger(serviceName string) *OTelKitLogger {
+
+	kitLogger := kitlog.NewLogfmtLogger(os.Stdout)
+	kitLogger = kitlog.With(
+		kitLogger,
+		"ts", kitlog.DefaultTimestampUTC,
+		"service", serviceName,
+	)
+	
 	return &OTelKitLogger{
 		logger: global.GetLoggerProvider().Logger(serviceName), // using global logger from open-telementry
+		kitLogger: kitLogger,
 	}
 }
 
 func (l *OTelKitLogger) Log(keyvals ...interface{}) error {
+
 	ctx := context.Background() 
+
+	_ = l.kitLogger.Log(keyvals...)
+
 	record := log.Record{}
 	record.SetTimestamp(time.Now())
 	record.SetObservedTimestamp(time.Now())
