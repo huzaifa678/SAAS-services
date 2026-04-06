@@ -15,4 +15,6 @@ public interface InvoiceRepository
     List<InvoiceEntity> findByStatus(String status);
 
     Optional<InvoiceEntity> findBySubscriptionId(UUID subscriptionId);
+
+    void deleteAll();
 }
