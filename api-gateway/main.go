@@ -103,9 +103,9 @@ func runGoKitHTTP(ctx context.Context, waitGroup *errgroup.Group, cfg *utils.Con
 	subEndpoint = endpoint.LoggingMiddleware(logger)(subEndpoint)
 	billEndpoint = endpoint.LoggingMiddleware(logger)(billEndpoint)
 
-	authEndpoint = endpoint.RateLimitMiddleware(redisClient, 10, 5, "auth", logger)(authEndpoint)
-	subEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "sub", logger)(subEndpoint)
-	billEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "bill", logger)(billEndpoint)
+	authEndpoint = endpoint.RateLimitMiddleware(redisClient, 10, 5, "auth", logger, 30*time.Second, )(authEndpoint)
+	subEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "sub", logger, 30*time.Second, )(subEndpoint)
+	billEndpoint = endpoint.RateLimitMiddleware(redisClient, 5, 3, "bill", logger, 30*time.Second, )(billEndpoint)
 
 	subEndpoint = interceptor.JWTMiddleware(jwtSecret)(subEndpoint)
 	billEndpoint = interceptor.JWTMiddleware(jwtSecret)(billEndpoint)
