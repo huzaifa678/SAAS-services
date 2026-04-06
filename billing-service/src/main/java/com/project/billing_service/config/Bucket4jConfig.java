@@ -7,11 +7,17 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.ByteArrayCodec;
 import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.codec.StringCodec;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
+@ConditionalOnProperty(
+        name = "bucket4j.enabled",
+        havingValue = "true",
+        matchIfMissing = true
+)
 public class Bucket4jConfig {
 
     @Bean
