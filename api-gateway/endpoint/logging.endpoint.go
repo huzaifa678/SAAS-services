@@ -13,23 +13,27 @@ import (
 func LoggingMiddleware(logger kitlog.Logger) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
+
 			begin := time.Now()
 
 			resp, err := next(ctx, request)
 
-			var traceID, spanID string
-			if span := trace.SpanFromContext(ctx); span != nil {
-				sc := span.SpanContext()
-				traceID = sc.TraceID().String()
-				spanID = sc.SpanID().String()
-			}
+			span := trace.SpanFromContext(ctx)
+			sc := span.SpanContext()
 
-			level.Info(logger).Log(
+			traceID := sc.TraceID().String()
+			spanID := sc.SpanID().String()
+
+			ctxLogger := kitlog.With(logger,
+				"trace_id", traceID,
+				"span_id", spanID,
+				"level", "info",
+			)
+
+			level.Info(ctxLogger).Log(
 				"msg", "endpoint called",
 				"took", time.Since(begin).String(),
 				"error", err,
-				"trace_id", traceID,
-				"span_id", spanID,
 			)
 
 			return resp, err

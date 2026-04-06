@@ -39,11 +39,11 @@ var interruptSignals = []os.Signal{
 func main() {
 	cfg := utils.Load()
 
-	tr := otel.Tracer("debug")
-	_, span := tr.Start(context.Background(), "startup-test")
-	span.End()
+	ctx := context.Background()
+	ctx, span := otel.Tracer("api-gateway").Start(ctx, "request")
+	defer span.End()
 
-	shutdownLogger := logging.InitLogger()
+	shutdownLogger := logging.InitLogger(ctx, cfg.App.Name)
 	defer shutdownLogger(context.Background())	
 	
 	logger := logging.NewOTelKitLogger(cfg.App.Name) 

@@ -22,6 +22,9 @@ exporters:
     tls:
       insecure: true
 
+  debug:
+    verbosity: detailed
+
   prometheus:
     endpoint: localhost:8889   # ✅ removes 0.0.0.0 warning
 
@@ -45,4 +48,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [resource, batch]
-      exporters: [otlphttp/loki]
+      exporters: [debug, otlphttp/loki]
