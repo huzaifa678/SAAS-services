@@ -86,14 +86,12 @@ services:
     command: ["--config=/etc/otel-collector-config-elk.yml"]
     volumes:
       - ./docker/otel/otel-collector-config-elk.yml:/etc/otel-collector-config-elk.yml
-      - otel_data:/var/otel
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro 
     profiles:
       - elk
     ports:
-      - "43181:4318"
-      - "43171:4317"
-      - "8890:8889"
+      - "43180:4318"
+      - "43170:4317"
+      - "8889:8889"
     networks:
       - usage-network
 
