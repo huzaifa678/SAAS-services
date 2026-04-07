@@ -1,18 +1,13 @@
 receivers:
   otlp:
     protocols:
-      http:
-        endpoint: 0.0.0.0:4317
       grpc:
+        endpoint: 0.0.0.0:4317
+      http:
         endpoint: 0.0.0.0:4318
 
-  filelog:
-    include:
-      - /var/lib/docker/containers/*/*.log
-    start_at: beginning
-
 processors:
-  batch:
+  batch: {}
 
   resource:
     attributes:
@@ -38,12 +33,12 @@ service:
 
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [resource, batch]
       exporters: [otlp/elastic]
 
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [resource, batch]
       exporters: [prometheus]
 
     logs:
