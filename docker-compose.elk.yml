@@ -34,6 +34,8 @@ services:
     container_name: logstash
     depends_on:
       - elasticsearch
+    env_file:
+      - .env.elk
     profiles:
       - elk
     ports:
@@ -49,6 +51,8 @@ services:
     container_name: kibana
     depends_on:
       - elasticsearch
+    env_file:
+      - .env.elk
     profiles:
       - elk
     environment:
@@ -63,6 +67,8 @@ services:
   apm-server:
     image: docker.elastic.co/apm/apm-server:8.13.4
     container_name: apm-server
+    env_file:
+      - .env.elk
     profiles:
       - elk
     depends_on:
