@@ -34,7 +34,7 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
 
-  otlphttp/logstash:
+  http/logstash:
     endpoint: http://logstash:5000
 
 service:
@@ -53,4 +53,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [transform/logs, batch]
-      exporters: [otlphttp/logstash]
+      exporters: [http/logstash]
