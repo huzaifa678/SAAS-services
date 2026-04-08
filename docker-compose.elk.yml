@@ -110,39 +110,39 @@ services:
     restart: "no"
     env_file:
       - .env.elk   
-    entrypoint: >
-      sh -c "
-      echo 'Waiting for Elasticsearch...';
+    entrypoint: |
+      sh -c '
+      echo "Waiting for Elasticsearch..."
 
-      until curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} http://elasticsearch:9200 | grep -q 'cluster_name'; do
-        sleep 5;
-      done;
+      until curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} http://elasticsearch:9200 | grep -q "cluster_name"; do
+        sleep 5
+      done
 
-      echo 'Elasticsearch is ready';
+      echo "Elasticsearch is ready"
 
-      echo 'Creating role logstash_writer...';
-      curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} -X PUT http://elasticsearch:9200/_security/role/logstash_writer \
-        -H 'Content-Type: application/json' \
-        -d '{
+      echo "Creating role logstash_writer..."
+      curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} -X PUT "http://elasticsearch:9200/_security/role/logstash_writer" \
+        -H "Content-Type: application/json" \
+        -d "{
           \"cluster\": [\"monitor\"],
           \"indices\": [
             {
-              \"names\": [\"saas-logs-*\"],
-              \"privileges\": [\"write\",\"create_index\"]
+              \"names\": [\"saas-logs-*\"] ,
+              \"privileges\": [\"write\",\"create\",\"create_index\"]
             }
           ]
-        }';
+        }"
 
-      echo 'Creating user logstash_user...';
-      curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} -X PUT http://elasticsearch:9200/_security/user/logstash_user \
-        -H 'Content-Type: application/json' \
-        -d '{
+      echo "Creating user logstash_user..."
+      curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} -X PUT "http://elasticsearch:9200/_security/user/logstash_user" \
+        -H "Content-Type: application/json" \
+        -d "{
           \"password\": \"logstash_pass\",
           \"roles\": [\"logstash_writer\"]
-        }';
+        }"
 
-      echo 'Setup complete!';
-      "
+      echo "Setup complete!"
+      '
 
 networks:
   usage-network:
@@ -150,4 +150,3 @@ networks:
 
 volumes:
   elasticsearch_data:
-  otel_data:
