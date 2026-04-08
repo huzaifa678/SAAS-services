@@ -150,4 +150,3 @@ networks:
 
 volumes:
   elasticsearch_data:
-  otel_data:
