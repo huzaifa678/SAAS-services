@@ -34,13 +34,14 @@ services:
     container_name: logstash
     depends_on:
       - elasticsearch
-    env_file:
-      - .env.elk
     profiles:
       - elk
     ports:
       - "5044:5044"
       - "5001:5000"
+    environment:
+      LOGSTASH_USER: ${LOGSTASH_USER}
+      LOGSTASH_PASSWORD: ${LOGSTASH_PASSWORD}
     networks:
       - usage-network
     volumes:
@@ -51,8 +52,6 @@ services:
     container_name: kibana
     depends_on:
       - elasticsearch
-    env_file:
-      - .env.elk
     profiles:
       - elk
     environment:
@@ -67,8 +66,6 @@ services:
   apm-server:
     image: docker.elastic.co/apm/apm-server:8.13.4
     container_name: apm-server
-    env_file:
-      - .env.elk
     profiles:
       - elk
     depends_on:
@@ -77,6 +74,8 @@ services:
       - "8200:8200"
     networks:
       - usage-network
+    environment:
+      ELASTIC_SEARCH: ${ELASTIC_SEARCH}
     command: >
       apm-server -e
         -E output.elasticsearch.hosts=["http://elasticsearch:9200"]
