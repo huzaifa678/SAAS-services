@@ -57,7 +57,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD_KIBANA}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_SEARCH_PASSWORD_KIBANA}
     ports:
       - "5601:5601"
     networks:
@@ -75,12 +75,12 @@ services:
     networks:
       - usage-network
     environment:
-      ELASTIC_SEARCH: ${ELASTIC_SEARCH}
+      ELASTIC_SEARCH_PASSWORD: ${ELASTIC_SEARCH_PASSWORD}
     command: >
       apm-server -e
         -E output.elasticsearch.hosts=["http://elasticsearch:9200"]
         -E output.elasticsearch.username=elastic
-        -E output.elasticsearch.password=${ELASTIC_PASSWORD}
+        -E output.elasticsearch.password=${ELASTIC_SEARCH_PASSWORD}
         -E apm-server.data_streams.wait_for_integration=false
         -E apm-server.host=0.0.0.0:8200
 
@@ -114,14 +114,14 @@ services:
       sh -c "
       echo 'Waiting for Elasticsearch...';
 
-      until curl -s -u elastic:${ELASTIC_PASSWORD} http://elasticsearch:9200 | grep -q 'cluster_name'; do
+      until curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} http://elasticsearch:9200 | grep -q 'cluster_name'; do
         sleep 5;
       done;
 
       echo 'Elasticsearch is ready';
 
       echo 'Creating role logstash_writer...';
-      curl -s -u elastic:${ELASTIC_PASSWORD} -X PUT http://elasticsearch:9200/_security/role/logstash_writer \
+      curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} -X PUT http://elasticsearch:9200/_security/role/logstash_writer \
         -H 'Content-Type: application/json' \
         -d '{
           \"cluster\": [\"monitor\"],
@@ -134,7 +134,7 @@ services:
         }';
 
       echo 'Creating user logstash_user...';
-      curl -s -u elastic:${ELASTIC_PASSWORD} -X PUT http://elasticsearch:9200/_security/user/logstash_user \
+      curl -s -u elastic:${ELASTIC_SEARCH_PASSWORD} -X PUT http://elasticsearch:9200/_security/user/logstash_user \
         -H 'Content-Type: application/json' \
         -d '{
           \"password\": \"logstash_pass\",
