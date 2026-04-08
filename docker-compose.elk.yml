@@ -142,7 +142,7 @@ services:
         -H "Content-Type: application/json" \
         -d "{
           \"password\": \"logstash_pass\",
-          \"roles\": [\"logstash_writer\"]
+          \"roles\": [\"logstash_writer\", \"logstash_system\"]
         }"
 
       echo "Setup complete!"
