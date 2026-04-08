@@ -54,7 +54,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=I*8EnpQgrZ3Qx1P7GzRi
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD_KIBANA}
     ports:
       - "5601:5601"
     networks:
@@ -75,7 +75,7 @@ services:
       apm-server -e
         -E output.elasticsearch.hosts=["http://elasticsearch:9200"]
         -E output.elasticsearch.username=elastic
-        -E output.elasticsearch.password=HD2QvEqZk1dKn-TL6web
+        -E output.elasticsearch.password=${ELASTIC_PASSWORD}
         -E apm-server.data_streams.wait_for_integration=false
         -E apm-server.host=0.0.0.0:8200
 
