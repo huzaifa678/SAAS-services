@@ -15,7 +15,7 @@ from opentelemetry.instrumentation.logging import LoggingInstrumentation
 load_dotenv()
 
 def setup_tracing(service_name: str):
-    otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:43180")
+    otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
     resource = Resource.create({"service.name": os.getenv("OTEL_SERVICE_NAME", service_name)})
 
     provider = TracerProvider(resource=resource)
