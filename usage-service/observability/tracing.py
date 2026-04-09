@@ -30,5 +30,10 @@ def setup_tracing(service_name: str):
     )
     set_logger_provider(log_provider)
 
-    LoggingInstrumentation().instrument(set_logging_format=True)
-    logging.getLogger().setLevel(logging.INFO)
+    LoggingInstrumentation().instrument(set_logging_format=True, log_level=logging.INFO)
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s [%(name)s] "
+               "[trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] %(message)s"
+    )
