@@ -15,6 +15,7 @@ from opentelemetry.instrumentation.logging import LoggingInstrumentation
 load_dotenv()
 
 def setup_tracing(service_name: str):
+    
     otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
     resource = Resource.create({"service.name": os.getenv("OTEL_SERVICE_NAME", service_name)})
 
@@ -22,16 +23,18 @@ def setup_tracing(service_name: str):
     provider.add_span_processor(
         BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{otlp_endpoint}/v1/traces"))
     )
+
     trace.set_tracer_provider(provider)
 
     log_provider = LoggerProvider(resource=resource)
     log_provider.add_log_record_processor(
         BatchLogRecordProcessor(OTLPLogExporter(endpoint=f"{otlp_endpoint}/v1/logs"))
     )
+
     set_logger_provider(log_provider)
 
     LoggingInstrumentation().instrument(set_logging_format=True, log_level=logging.INFO)
-    
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s [%(name)s] "
