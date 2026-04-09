@@ -42,6 +42,10 @@ services:
     environment:
       LOGSTASH_USER: ${LOGSTASH_USER}
       LOGSTASH_PASSWORD: ${LOGSTASH_PASSWORD}
+      XPACK_MONITORING_ENABLED: "true"
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      XPACK_MONITORING_ELASTICSEARCH_USERNAME: ${LOGSTASH_USER}
+      XPACK_MONITORING_ELASTICSEARCH_PASSWORD: ${LOGSTASH_PASSWORD}
     networks:
       - usage-network
     volumes:
@@ -138,7 +142,7 @@ services:
         -H "Content-Type: application/json" \
         -d "{
           \"password\": \"logstash_pass\",
-          \"roles\": [\"logstash_writer\"]
+          \"roles\": [\"logstash_writer\", \"logstash_system\"]
         }"
 
       echo "Setup complete!"
