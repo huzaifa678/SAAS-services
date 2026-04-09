@@ -14,9 +14,9 @@ processors:
       - context: log
         statements:
           - set(attributes["message"], body)
-          - set(attributes["severity"], severity_text)
-          - set(attributes["service"], resource.attributes["service.name"])
-          - set(attributes["timestamp"], time)
+          - set(attributes["log.level"], severity_text)
+          - set(attributes["service.name"], resource.attributes["service.name"])
+          - set(attributes["event.dataset"], "application")
 
   resource:
     attributes:
@@ -28,6 +28,12 @@ exporters:
 
   otlp/elastic:
     endpoint: http://apm-server:8200
+    tls:
+      insecure: true
+
+  elasticsearch:
+    endpoints: ["http://elasticsearch:9200"]
+    logs_index: "otel-logs"
     tls:
       insecure: true
 
@@ -53,4 +59,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [transform/logs, batch]
-      exporters: [otlphttp/logstash]
+      exporters: [elasticsearch, otlphttp/logstash]
