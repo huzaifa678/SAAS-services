@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 	kitlog "github.com/go-kit/log"
 	"github.com/huzaifa678/SAAS-services/throttling"
 	"github.com/redis/go-redis/v9"
+	"github.com/huzaifa678/SAAS-services/errors"
 )
 
 type RedisRateLimiter struct {
@@ -54,7 +54,7 @@ func RateLimitMiddleware(redisClient *redis.Client, rps int, burst int, keyPrefi
 					"userID", userID,
 				)
 
-				return nil, errors.New("service busy (storage pressure)")
+				return nil, errors.ErrStoragePressure
 			}
 
 			key := fmt.Sprintf("%s:%s", limiter.keyPrefix, userID)
@@ -77,7 +77,7 @@ func RateLimitMiddleware(redisClient *redis.Client, rps int, burst int, keyPrefi
 					"rps", limiter.rps,
 					"burst", limiter.burst,
 				)
-				return nil, errors.New("rate limit exceeded")
+				return nil, errors.ErrRateLimitExceeded
 			}
 
 			_ = limiter.logger.Log(
