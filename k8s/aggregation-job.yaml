@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: aggregation
-          image: huzaifagill234/aggregation-job:latest
+          image: huzaifagill234/aggregation-job:1.0
           imagePullPolicy: Always
           env:
             - name: DATABASE_URL
