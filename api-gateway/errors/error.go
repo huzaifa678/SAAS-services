@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+func EncodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	
 	if err.Error() == "rate limit exceeded" || err.Error() == "service busy (storage pressure)" {
