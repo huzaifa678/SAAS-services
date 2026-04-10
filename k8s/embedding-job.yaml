@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: embedding
-          image: huzaifagill234/embedding-job:latest
+          image: huzaifagill234/embedding-job:1.0
           imagePullPolicy: Always
           env:
             - name: DATABASE_URL
