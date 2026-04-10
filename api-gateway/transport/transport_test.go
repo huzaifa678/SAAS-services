@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -81,7 +82,7 @@ func TestDecodeRESTRequest(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/billing/invoices", strings.NewReader(body))
 	req.Header.Set("Authorization", "Bearer token123")
 
-	result, err := DecodeRESTRequest(nil, req)
+	result, err := DecodeRESTRequest(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -106,7 +107,7 @@ func TestDecodeGraphQLRequest(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
-	result, err := DecodeGraphQLRequest(nil, req)
+	result, err := DecodeGraphQLRequest(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -123,7 +124,7 @@ func TestDecodeGraphQLRequest(t *testing.T) {
 func TestEncodeRESTRequest_WithError(t *testing.T) {
 	rr := httptest.NewRecorder()
 	resp := endpoint.ForwardResponse{Error: "service unavailable", Status: 503}
-	err := EncodeRESTRequest(nil, rr, resp)
+	err := EncodeRESTRequest(context.TODO(), rr, resp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -135,7 +136,7 @@ func TestEncodeRESTRequest_WithError(t *testing.T) {
 func TestEncodeRESTRequest_Success(t *testing.T) {
 	rr := httptest.NewRecorder()
 	resp := endpoint.ForwardResponse{Body: []byte(`{"ok":true}`), Status: 200}
-	err := EncodeRESTRequest(nil, rr, resp)
+	err := EncodeRESTRequest(context.TODO(), rr, resp)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
