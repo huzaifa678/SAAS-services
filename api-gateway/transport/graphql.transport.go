@@ -10,6 +10,7 @@ import (
 	"github.com/huzaifa678/SAAS-services/endpoint"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
+	"github.com/huzaifa678/SAAS-services/errors"
 )
 
 func DecodeGraphQLRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -74,5 +75,6 @@ func NewGraphQLHTTPHandler(endpoint kitendpoint.Endpoint) http.Handler {
 		kithttp.ServerBefore(func(ctx context.Context, r *http.Request) context.Context {
 			return otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(r.Header))
 		}),
+		kithttp.ServerErrorEncoder(errors.EncodeError),
 	)
 }
