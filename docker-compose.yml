@@ -159,7 +159,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     command: start-dev
     ports:
-      - "8080:8079"
+      - "8080:8080"
     depends_on:
       - keycloak-postgres
 
