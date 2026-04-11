@@ -162,7 +162,7 @@ services:
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_PROXY: "edge"
-    command: start-dev
+    command: start-dev --hostname-strict-https=false
     ports:
       - "8080:8080"
     depends_on:
