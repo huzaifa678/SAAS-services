@@ -7,7 +7,7 @@ BINARY  := bin/$(APP)
 build:
 	go build -o $(BINARY) ./...
 
-run:
+server:
 	go run main.go
 
 test: test-unit test-integration
