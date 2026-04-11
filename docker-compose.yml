@@ -164,11 +164,7 @@ services:
       KC_PROXY: "none"
     command: start-dev --hostname-strict-https=false
     ports:
-<<<<<<< HEAD
-      - "8080:8080"
-=======
       - "8180:8080"
->>>>>>> main
     depends_on:
       - keycloak-postgres
 
