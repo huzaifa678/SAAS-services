@@ -159,6 +159,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin 
       KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak_db
       KC_DB_USERNAME: keycloak_user
       KC_DB_PASSWORD: keycloak_password
       KC_HTTP_ENABLED: "true"
