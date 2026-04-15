@@ -1,6 +1,5 @@
-from sqlalchemy import Column, String, BigInteger, Numeric, Boolean, TIMESTAMP, func, text
+from sqlalchemy import Column, String, BigInteger, Numeric, Boolean, TIMESTAMP, text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
 from . import Base
 import uuid
 

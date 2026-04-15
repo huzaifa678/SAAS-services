@@ -1,5 +1,3 @@
-from airflow import DAG
-from datetime import datetime
 from sqlalchemy.orm import Session
 from models.usage_event import UsageEvent
 from models.usage_aggregate import UsageAggregate
