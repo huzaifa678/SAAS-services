@@ -1,16 +1,14 @@
-confluent-kafka==2.3.0
+confluent-kafka==2.6.0
+fastavro==1.12.1
 
 python-dotenv==1.0.1
+SQLAlchemy==2.0.49
+psycopg2-binary==2.9.11
 
-SQLAlchemy
-psycopg2-binary
+chromadb==0.5.15
 
-chromadb
-
-langchain==1.2.10
+langchain==1.2.15
+langchain-core==1.2.29
 langchain-community==0.4.1
 langchain-openai==1.1.10
-
-fastavro
-
-openai>=1.6.1
+openai==2.31.0 
