@@ -26,7 +26,7 @@ app.use('/api/auth', (req, res, next) => {
 
 app.use('/api/auth', router);
 
-app.get('/metrics', async (req, res) => {
+app.get('/metrics', async (res) => {
   res.set('Content-Type', promClient.register.contentType);
   res.end(await promClient.register.metrics());
 });
