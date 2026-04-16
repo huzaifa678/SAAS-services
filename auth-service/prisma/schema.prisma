@@ -21,4 +21,8 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id])
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([userId]) 
+  @@index([expiresAt]) 
+  @@index([userId, expiresAt])
 }
