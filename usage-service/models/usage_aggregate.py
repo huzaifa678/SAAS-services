@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Numeric, TIMESTAMP, func
+from sqlalchemy import Column, String, Numeric, TIMESTAMP, func, Index
 from sqlalchemy.dialects.postgresql import UUID
 from . import Base
 
@@ -11,3 +11,8 @@ class UsageAggregate(Base):
     monthly_total = Column(Numeric(19,4), nullable=False, default=0)
     rolling_avg = Column(Numeric(19,4), nullable=False, default=0)
     last_updated = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+
+    __table_args__ = (
+        Index("ix_usage_aggregates_customer_metric", "customer_id", "metric"),
+        Index("ix_usage_aggregates_last_updated", "last_updated"),
+    )
