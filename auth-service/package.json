@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest --detectOpenHandles --forceExit --coverage"
+    "test": "jest --detectOpenHandles --forceExit --coverage",
+    "migrate": "npx prisma migrate dev --name add_refresh_token_indexes"
   },
   "keywords": [],
   "author": "",
