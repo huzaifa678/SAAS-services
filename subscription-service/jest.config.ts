@@ -7,6 +7,8 @@ const config: Config.InitialOptions = {
 
   roots: ['<rootDir>/test'],
   moduleFileExtensions: ['ts', 'js', 'json'],
+  reporters: ['default'],
+  maxWorkers: 1, 
 
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
@@ -22,6 +24,8 @@ const config: Config.InitialOptions = {
     '^@repository/(.*)$': '<rootDir>/src/repository/$1',
     '^@events/(.*)$': '<rootDir>/src/events/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
+    '^@logger/(.*)$': '<rootDir>/src/logger/$1',
+    '^@lib/(.*)$': '<rootDir>/src/lib/$1',
   },
 
   testRegex: '.*\\.spec\\.ts$',

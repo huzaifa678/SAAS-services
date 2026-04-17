@@ -1,6 +1,8 @@
+import { WinstonLogger } from '@logger/winston.logger';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionResolver } from '@resolvers/subscription.resolver';
 import { SubscriptionService } from '@service/subscription.service';
+import { mockLogger } from './mock-logger';
 
 describe('SubscriptionResolver', () => {
   let resolver: SubscriptionResolver;
@@ -17,6 +19,7 @@ describe('SubscriptionResolver', () => {
       providers: [
         SubscriptionResolver,
         { provide: SubscriptionService, useValue: mockService },
+        { provide: WinstonLogger, useValue: mockLogger },
       ],
     }).compile();
 

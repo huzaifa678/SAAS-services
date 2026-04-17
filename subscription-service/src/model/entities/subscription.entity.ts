@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import {
   ObjectType,
@@ -18,6 +19,10 @@ registerEnumType(SubscriptionStatus, { name: 'SubscriptionStatus' });
 
 @ObjectType('Subscription')
 @Entity({ name: 'subscriptions' })
+@Index(['userId']) 
+@Index(['status'])
+@Index(['currentPeriodEnd']) 
+@Index(['userId', 'status'])
 export class SubscriptionEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
