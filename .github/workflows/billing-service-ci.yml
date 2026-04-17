@@ -1,6 +1,7 @@
 name: billing-service CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths: [billing-service/**]
