@@ -2,6 +2,8 @@ import CircuitBreaker from 'opossum';
 import logger from '../../logger.js' 
 
 export function createBreaker(fn, options = {}) {
+  let lastError = null; // initializing error for message \
+
   const defaultOptions = {
     timeout: 5000,      
     errorThresholdPercentage: 50, 
@@ -15,20 +17,28 @@ export function createBreaker(fn, options = {}) {
     breaker.fallback(fallback);
   }
 
-  breaker.on('open', () => logger.warn('Circuit breaker opened', { 
+  breaker.on('failure', (e) => {
+    lastError = e;
+
+    logger.error('Circuit breaker failure', {
       error: e.message,
-      path: req.path,
-      service: 'auth-service' // Extra label
-    })); 
-  breaker.on('halfOpen', () => logger.info('Circuit breaker halfopen', {
-      error: e.message,
-      path: req.path,
       service: 'auth-service'
-  })); 
-  breaker.on('closed', () => logger.info('Circuit breaker closed', { 
-      error: e.message,
-      path: req.path,
+    });
+  });
+
+  breaker.on('open', () => {
+    logger.warn('Circuit breaker opened', {
+      error: lastError?.message,
       service: 'auth-service'
-  })); 
+    });
+  });
+
+  breaker.on('halfOpen', () => {
+    logger.info('Circuit breaker half-open', {
+      error: lastError?.message,
+      service: 'auth-service'
+    });
+  });
+  
   return breaker;
 }
