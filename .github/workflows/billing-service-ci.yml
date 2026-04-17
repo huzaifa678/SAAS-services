@@ -47,3 +47,5 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
             ${{ env.IMAGE }}:1.0
+        env:
+          STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
