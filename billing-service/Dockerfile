@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jdk-alpine AS build
+FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 
 COPY gradlew settings.gradle build.gradle ./
@@ -8,7 +8,7 @@ RUN chmod +x gradlew && ./gradlew dependencies --no-daemon -q
 COPY src ./src
 RUN ./gradlew bootJar --no-daemon -x test
 
-FROM eclipse-temurin:25-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
