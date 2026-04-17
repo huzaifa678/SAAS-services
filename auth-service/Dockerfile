@@ -35,4 +35,4 @@ USER appuser
 EXPOSE 8080
 EXPOSE 4001
 
-CMD ["pnpm", "run", "dev"]
+CMD ["node", "index.js"]
