@@ -24,4 +24,4 @@ EXPOSE 8081
 # gRPC
 EXPOSE 50051
 
-CMD ["pnpm", "start"]
+CMD ["node", "dist/main.js"]
