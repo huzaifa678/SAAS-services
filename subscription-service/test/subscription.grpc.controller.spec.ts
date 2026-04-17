@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionGrpcController } from '@controller/subscription.controller.grpc';
 import { SubscriptionService } from '@service/subscription.service';
+import { WinstonLogger } from '@logger/winston.logger';
+import { mockLogger } from './mock-logger';
 
 describe('SubscriptionGrpcController', () => {
   let controller: SubscriptionGrpcController;
@@ -13,7 +15,9 @@ describe('SubscriptionGrpcController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SubscriptionGrpcController],
-      providers: [{ provide: SubscriptionService, useValue: mockService }],
+      providers: [{ provide: SubscriptionService, useValue: mockService },
+        { provide: WinstonLogger, useValue: mockLogger },
+      ],
     }).compile();
 
     controller = module.get(SubscriptionGrpcController);

@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SubscriptionEntity } from '@model/entities/subscription.entity';
 import { SubscriptionRepository } from '@repository/subscription.repository';
+import { WinstonLogger } from '@logger/winston.logger';
+import { mockLogger } from './mock-logger';
 
 describe('SubscriptionService (Integration)', () => {
   let service: SubscriptionService;
@@ -47,6 +49,7 @@ describe('SubscriptionService (Integration)', () => {
         SubscriptionRepository,
         { provide: CircuitBreakerService, useValue: mockBreakerService },
         { provide: SubscriptionEventsProducer, useValue: mockEventsProducer },
+        { provide: WinstonLogger, useValue: mockLogger },
       ],
     }).compile();
 
