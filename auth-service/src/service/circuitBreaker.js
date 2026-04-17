@@ -2,7 +2,7 @@ import CircuitBreaker from 'opossum';
 import logger from '../../logger.js' 
 
 export function createBreaker(fn, options = {}) {
-  let lastError = null; // initializing error for message \
+  let lastError = null; // initializing error for message 
 
   const defaultOptions = {
     timeout: 5000,      
@@ -39,6 +39,6 @@ export function createBreaker(fn, options = {}) {
       service: 'auth-service'
     });
   });
-  
+
   return breaker;
 }
