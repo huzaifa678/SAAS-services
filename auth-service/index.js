@@ -2,7 +2,7 @@ import './tracing.js';
 import 'dotenv/config';
 import express from 'express';
 import promClient from 'prom-client';
-import router from '../auth-service/src/controller/auth.controller.js';
+import router from './src/controller/auth.controller.js';
 import http from 'http';
 import logger from './logger.js';
 

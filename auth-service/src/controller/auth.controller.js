@@ -11,7 +11,7 @@ import { resolvers } from '../resolvers/auth.resolver.js';
 const router = express.Router();
 const tracer = trace.getTracer('auth-service');
 
-router.use((req, next) => {
+router.use((req, res, next) => {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.replace('Bearer ', '');
   req.userId = null;
